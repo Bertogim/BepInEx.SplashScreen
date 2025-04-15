@@ -7,6 +7,8 @@ This patcher is mostly meant for inclusion in modpacks to give end-users immedia
 
 The patcher and GUI app have evolved from a very old version of [risk-of-thunder/BepInEx.GUI](https://github.com/risk-of-thunder/BepInEx.GUI), though at this point most of the code has been rewritten and this version works in all games. That being said, if you are modding Risk Of Rain 2, use risk-of-thunder/BepInEx.GUI for a better experience.
 
+> 🛠️ This is a fork of the original project [BepInEx/BepInEx.SplashScreen](https://github.com/BepInEx/BepInEx.SplashScreen), with possible modifications or repackaging by the forking author.
+
 ## How to use
 1. Install [BepInEx](https://github.com/BepInEx/BepInEx) 5.4.11 or later, or 6.0.0-be.674 or later (works on both mono and IL2CPP).
 2. Download latest release for your BepInEx version.
