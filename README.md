@@ -16,7 +16,7 @@ The patcher and GUI app have evolved from a very old version of [risk-of-thunder
 4. You should now see the splash screen appear on game start-up, assuming BepInEx is configured properly.
 
 ### Splash screen doesn't appear
-1. Make sure that `BepInEx.SplashScreen.GUI.exe` and `BepInEx.SplashScreen.Patcher.dll` are both present inside the `BepInEx\patchers` folder.
+1. Make sure that `LoadingScreen.GUI.exe` and `BepInEx.SplashScreen.Patcher.dll` are both present inside the `BepInEx\patchers` folder.
 2. Check if the splash screen isn't disabled in `BepInEx\config\BepInEx.cfg`. If you can't see this file or the SplashScreen Enable setting, it means either BepInEx isn't correctly configured or this patcher is failing to start for some reason.
 3. Update BepInEx 5 to latest version and make sure that it is running.
 4. If the splash screen still does not appear, check the game log for any errors or exceptions. You can report issues on [GitHub](https://github.com/BepInEx/BepInEx.SplashScreen/issues).

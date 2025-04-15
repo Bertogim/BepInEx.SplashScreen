@@ -47,7 +47,7 @@ namespace BepInEx.SplashScreen
                     }
                 }
 
-                var guiExecutablePath = Path.Combine(Path.GetDirectoryName(typeof(SplashScreenController).Assembly.Location) ?? Path.Combine(Paths.PatcherPluginPath, "BepInEx.SplashScreen"), "BepInEx.SplashScreen.GUI.exe");
+                var guiExecutablePath = Path.Combine(Path.GetDirectoryName(typeof(SplashScreenController).Assembly.Location) ?? Path.Combine(Paths.PatcherPluginPath, "LoadingScreen"), "LoadingScreen.GUI.exe");
 
                 if (!File.Exists(guiExecutablePath))
                     throw new FileNotFoundException("Executable not found or inaccessible at " + guiExecutablePath);

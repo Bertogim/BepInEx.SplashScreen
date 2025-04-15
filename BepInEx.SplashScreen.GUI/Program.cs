@@ -33,7 +33,7 @@ namespace BepInEx.SplashScreen
                 {
                     if (MessageBox.Show("This is a splash screen that shows loading progress when a game patched with BepInEx is loading. It is automatically started and then updated by \"BepInEx.SplashScreen.Patcher.dll\" and can't be opened manually.\n\n" +
                                         "If you can't see a splash screen when the game is starting:\n" +
-                                        "1 - Make sure that \"BepInEx.SplashScreen.GUI.exe\" and \"BepInEx.SplashScreen.Patcher.dll\" are both present inside the \"BepInEx\\patchers\" folder.\n" +
+                                        "1 - Make sure that \"LoadingScreen.GUI.exe\" and \"BepInEx.SplashScreen.Patcher.dll\" are both present inside the \"BepInEx\\patchers\" folder.\n" +
                                         "2 - Check if the splash screen isn't disabled in \"BepInEx\\config\\BepInEx.cfg\".\n" +
                                         "3 - Update BepInEx5 to latest version and make sure that it is running.\n" +
                                         "4 - If the splash screen still does not appear, check the game log for any errors or exceptions. You can report issues on GitHub.\n\n" +
