@@ -8,7 +8,7 @@ To add a custom image, leave a space down there to make space for the loading ba
 Change LoadingImage.png with your own
 
 ## About the fork
-BepInEx.SplashScreen.GUI is renamed to LoadingScreen.GUI to try to fix discord activity detecting the loading screen as other game (Not tested)
+BepInEx.SplashScreen.GUI.exe is renamed to LoadingScreen.GUI.exe to try to fix discord activity detecting the loading screen as other game (Not tested)
 
 This fork is only tested with Lethal Company but it should work with other games
 
