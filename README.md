@@ -1,9 +1,10 @@
 ![Loading preview](https://raw.githubusercontent.com/Bertogim/BepInEx.SplashScreen/refs/heads/main/example.png)
 
-## Change image (Recommended)
-To add a custom image (Recommended), leave a space down there to make space for the loading bar and text
+## Custom image (Recommended)
+To add a custom image, leave a space down there to make space for the loading bar and text
 
 ![Image crop](https://raw.githubusercontent.com/Bertogim/BepInEx.SplashScreen/refs/heads/main/crop.png)
+
 Change LoadingImage.png with your own
 
 ## About the fork
