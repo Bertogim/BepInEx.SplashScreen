@@ -102,7 +102,7 @@ namespace BepInEx.SplashScreen
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            if (!Program.isGameLoaded)
+            if (Program.isGameLoaded == false)
             {
                 Process.Start(_gameLocation);
             }
@@ -110,7 +110,7 @@ namespace BepInEx.SplashScreen
 
         private void Form_MouseDown(object sender, MouseEventArgs e)
         {
-            if (!Program.isGameLoaded)
+            if (Program.isGameLoaded == false)
             {
                 dragging = true;
                 dragCursorPoint = Cursor.Position;
@@ -120,7 +120,7 @@ namespace BepInEx.SplashScreen
 
         private void Form_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!Program.isGameLoaded)
+            if (Program.isGameLoaded == false)
             {
                 if (dragging)
                 {

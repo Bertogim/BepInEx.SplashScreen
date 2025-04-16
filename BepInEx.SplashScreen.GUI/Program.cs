@@ -16,7 +16,7 @@ namespace BepInEx.SplashScreen
     {
         private static SplashScreen _mainForm;
 
-        private static readonly System.Timers.Timer _AliveTimer = new System.Timers.Timer(60000);
+        private static readonly System.Timers.Timer _AliveTimer = new System.Timers.Timer(30000); //30 seconds
 
         /// <summary>
         /// The main entry point for the application.
