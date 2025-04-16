@@ -33,7 +33,7 @@ namespace BepInEx.SplashScreen
             // 
             this.pictureBox1.Dock = DockStyle.Fill;
             this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.Image = Image.FromFile(System.IO.Path.Combine(Application.StartupPath, "LosCompasCompany_Colors.png"));
+            this.pictureBox1.Image = Image.FromFile(System.IO.Path.Combine(Application.StartupPath, "LoadingImage.png"));
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
 
