@@ -1,4 +1,11 @@
-![Splash screen preview](https://github.com/BepInEx/BepInEx.SplashScreen/assets/39247311/07831558-91e7-48fa-a2de-fc3c6d29a731)
+![Loading preview](https://raw.githubusercontent.com/Bertogim/BepInEx.SplashScreen/refs/heads/main/example.png)
+
+To add a custom image (Recommended), leave a space down there to make space for the loading bar and text
+![Image crop](https://raw.githubusercontent.com/Bertogim/BepInEx.SplashScreen/refs/heads/main/crop.png)
+
+BepInEx.SplashScreen.GUI is renamed to LoadingScreen.GUI to try to fix discord activity detecting the loading screen as other game (Not tested)
+
+This fork is only tested with Lethal Company but it should work with other games
 
 # BepInEx Loading Progress Splash Screen
 A BepInEx patcher that displays a loading screen on game startup with information about patchers and plugins being currently loaded. It's best suited for games where patchers and plugins take a long time to initialize.
