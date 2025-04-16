@@ -61,7 +61,6 @@ namespace BepInEx.SplashScreen
 
                     // Get game location and icon
                     var gameExecutable = gameProcess.MainModule.FileName;
-                    _mainForm.SetGameLocation(Path.GetDirectoryName(gameExecutable));
                     _mainForm.SetIcon(IconManager.GetLargeIcon(gameExecutable, true, true).ToBitmap());
 
                     BeginSnapPositionToGameWindow(gameProcess);
@@ -85,7 +84,6 @@ namespace BepInEx.SplashScreen
                 }
                 catch (Exception e)
                 {
-                    _mainForm.SetGameLocation(null);
                     _mainForm.SetIcon(null);
                     Log("Failed to get some info about the game process: " + e, true);
                     Debug.Fail(e.ToString());
@@ -227,6 +225,7 @@ namespace BepInEx.SplashScreen
         #endregion
 
         #region Window poisition snap
+        public static bool isGameLoaded = false;
 
         private static void BeginSnapPositionToGameWindow(Process gameProcess)
         {
@@ -282,7 +281,7 @@ namespace BepInEx.SplashScreen
                     var foregroundWindow = NativeMethods.GetForegroundWindow();
                     // The main game window is not responding most of the time, which prevents it from being recognized as the foreground window
                     // To work around this, check if the currently focused window is the splash window, as it will most likely be the last focused window after user clicks on the game window
-                    _mainForm.TopMost = gameWindowHandle == foregroundWindow ||  NativeMethods.IsBorderless(gameWindowHandle);
+                    _mainForm.TopMost = gameWindowHandle == foregroundWindow || NativeMethods.IsBorderless(gameWindowHandle);
 
                     // Just in case, don't want to mangle the splash
                     if (default(NativeMethods.RECT).Equals(rct))
@@ -300,6 +299,7 @@ namespace BepInEx.SplashScreen
                         // At this point the form is snapped to the main game window so prevent user from trying to drag it
                         _mainForm.FormBorderStyle = FormBorderStyle.None;
                         //_mainForm.BackColor = Color.White;
+                        isGameLoaded = true;
                         _mainForm.PerformLayout();
                     }
                 }
@@ -349,7 +349,6 @@ namespace BepInEx.SplashScreen
                 return (style & WS_CAPTION) == 0 && (style & WS_SYSMENU) == 0;
             }
         }
-
         #endregion
     }
 }

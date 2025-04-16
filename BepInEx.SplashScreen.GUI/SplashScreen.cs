@@ -12,6 +12,8 @@ namespace BepInEx.SplashScreen
         private string _gameLocation;
         private int _pluginPercentDone;
 
+
+
         public SplashScreen()
         {
             InitializeComponent();
@@ -19,8 +21,6 @@ namespace BepInEx.SplashScreen
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100 + checkedListBox1.Items.Count * 15;
             progressBar1.Value = 0;
-
-            labelTop.Font = new Font(labelTop.Font, FontStyle.Bold);
 
             AppendToItem(0, WorkingStr);
         }
@@ -40,7 +40,7 @@ namespace BepInEx.SplashScreen
                     checkedListBox1.SetItemChecked(1, true);
                     AppendToItem(1, DoneStr);
                     SetStatusMain("Finished applying patchers.");
-                    SetStatusDetail("Plugins should start loading soon.\nIn case loading is stuck, check your entry point.");
+                    SetStatusDetail("Plugins should start loading soon.");//\nIn case loading is stuck, check your entry point.");
                     break;
 
                 case LoadEvent.ChainloaderStart:
@@ -54,7 +54,7 @@ namespace BepInEx.SplashScreen
                     AppendToItem(2, DoneStr);
                     AppendToItem(3, WorkingStr);
                     SetStatusMain("Finished loading plugins.");
-                    SetStatusDetail("Waiting for the game to start...\nSome plugins might need more time to finish loading.");
+                    SetStatusDetail("Waiting for the game to start...");//\nSome plugins might need more time to finish loading.");
                     break;
 
                 case LoadEvent.LoadFinished:
@@ -81,12 +81,13 @@ namespace BepInEx.SplashScreen
         {
             progressBar1.Value = checkedListBox1.CheckedItems.Count * 15 + _pluginPercentDone;
         }
-
         public void SetStatusMain(string msg)
         {
-            labelTop.Text = msg;
+            if (!string.IsNullOrEmpty(msg))
+            {
+                labelBot.Text = msg;
+            }
         }
-
         public void SetStatusDetail(string msg)
         {
             labelBot.Text = msg;
@@ -94,27 +95,44 @@ namespace BepInEx.SplashScreen
 
         public void SetIcon(Image icon)
         {
-            if (icon != null)
+
+        }
+
+
+
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            if (!Program.isGameLoaded)
             {
-                pictureBox1.SizeMode = icon.Height < pictureBox1.Height ? PictureBoxSizeMode.CenterImage : PictureBoxSizeMode.Zoom;
-                pictureBox1.Image = icon;
-            }
-            else
-            {
-                pictureBox1.Visible = false;
+                Process.Start(_gameLocation);
             }
         }
 
-        public void SetGameLocation(string location)
+        private void Form_MouseDown(object sender, MouseEventArgs e)
         {
-            if (location != null)
+            if (!Program.isGameLoaded)
             {
-                _gameLocation = location;
+                dragging = true;
+                dragCursorPoint = Cursor.Position;
+                dragFormPoint = this.Location;
             }
-            else
+        }
+
+        private void Form_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!Program.isGameLoaded)
             {
-                button1.Visible = false;
+                if (dragging)
+                {
+                    Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
+                    this.Location = Point.Add(dragFormPoint, new Size(diff));
+                }
             }
+        }
+
+        private void Form_MouseUp(object sender, MouseEventArgs e)
+        {
+            dragging = false;
         }
 
         public void SetPluginProgress(int percentDone)
@@ -122,10 +140,12 @@ namespace BepInEx.SplashScreen
             _pluginPercentDone = Math.Min(100, Math.Max(Math.Max(0, percentDone), _pluginPercentDone));
             UpdateProgress();
         }
-
-        private void Button1_Click(object sender, EventArgs e)
+        
+        protected override void OnActivated(EventArgs e)
         {
-            Process.Start(_gameLocation);
+            base.OnActivated(e);
+            this.TopMost = true;
         }
+
     }
 }
