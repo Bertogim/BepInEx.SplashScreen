@@ -1,8 +1,12 @@
 ![Loading preview](https://raw.githubusercontent.com/Bertogim/BepInEx.SplashScreen/refs/heads/main/example.png)
 
+## Change image (Recommended)
 To add a custom image (Recommended), leave a space down there to make space for the loading bar and text
-![Image crop](https://raw.githubusercontent.com/Bertogim/BepInEx.SplashScreen/refs/heads/main/crop.png)
 
+![Image crop](https://raw.githubusercontent.com/Bertogim/BepInEx.SplashScreen/refs/heads/main/crop.png)
+Change LoadingImage.png with your own
+
+## About the fork
 BepInEx.SplashScreen.GUI is renamed to LoadingScreen.GUI to try to fix discord activity detecting the loading screen as other game (Not tested)
 
 This fork is only tested with Lethal Company but it should work with other games
