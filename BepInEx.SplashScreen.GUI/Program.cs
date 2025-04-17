@@ -84,7 +84,7 @@ namespace BepInEx.SplashScreen
                 }
                 catch (Exception e)
                 {
-                    _mainForm.SetIcon(null);
+                    //_mainForm.SetIcon(null);
                     Log("Failed to get some info about the game process: " + e, true);
                     Debug.Fail(e.ToString());
                 }
@@ -253,7 +253,7 @@ namespace BepInEx.SplashScreen
                         gameWindowTitle.StartsWith("Select BepInEx"))
                     {
                         // Need to refresh the process if the window handle is not yet valid or it will keep grabbing the old one
-                        _mainForm.TopMost = false;
+                        _mainForm.TopMost = true;
                         gameProcess.Refresh();
                         continue;
                     }
@@ -263,7 +263,7 @@ namespace BepInEx.SplashScreen
                     if (gameWindowTitle.EndsWith(" Configuration"))
                     {
                         _mainForm.Visible = false;
-                        _mainForm.TopMost = false;
+                        _mainForm.TopMost = true;
                         temporarilyHidden = true;
                         gameProcess.Refresh();
                         continue;
@@ -281,7 +281,7 @@ namespace BepInEx.SplashScreen
                     var foregroundWindow = NativeMethods.GetForegroundWindow();
                     // The main game window is not responding most of the time, which prevents it from being recognized as the foreground window
                     // To work around this, check if the currently focused window is the splash window, as it will most likely be the last focused window after user clicks on the game window
-                    _mainForm.TopMost = gameWindowHandle == foregroundWindow || NativeMethods.IsBorderless(gameWindowHandle);
+                    _mainForm.TopMost = true;//TopMost = gameWindowHandle == foregroundWindow || NativeMethods.IsBorderless(gameWindowHandle);
 
                     // Just in case, don't want to mangle the splash
                     if (default(NativeMethods.RECT).Equals(rct))

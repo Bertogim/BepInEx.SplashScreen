@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
+using System.IO;
 
 namespace BepInEx.SplashScreen
 {
@@ -93,9 +94,66 @@ namespace BepInEx.SplashScreen
             labelBot.Text = msg;
         }
 
-        public void SetIcon(Image icon)
-        {
+public void SetIcon(Image fallbackIcon)
+{
+    string imagePath = System.IO.Path.Combine(Application.StartupPath, "LoadingImage.png");
 
+    if (File.Exists(imagePath))
+    {
+        try
+        {
+            // Load the image from file
+            Image img = Image.FromFile(imagePath);
+
+            // Fixed width for the form
+            int fixedWidth = 768;
+
+            // Calculate scaled height to maintain aspect ratio
+            float scale = (float)fixedWidth / img.Width;
+            int scaledHeight = (int)(img.Height * scale);
+
+            // Additional space for label and progress bar
+            int labelHeight = 30;
+            int progressHeight = 10;
+            int totalHeight = scaledHeight + labelHeight + progressHeight;
+
+            // Set form and picture box sizes
+            this.ClientSize = new Size(fixedWidth, totalHeight);
+            pictureBox1.Size = new Size(fixedWidth, scaledHeight);
+            pictureBox1.Location = new Point(0, 0);
+            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox1.Image = img;
+
+            // Adjust label and progress bar positions
+            labelBot.Size = new Size(fixedWidth, labelHeight);
+            labelBot.Location = new Point(0, scaledHeight);
+
+            progressBar1.Size = new Size(fixedWidth, progressHeight);
+            progressBar1.Location = new Point(0, scaledHeight + labelHeight);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error loading the custom image, falling back to default icon: " + ex.Message);
+            UseFallbackIcon(fallbackIcon);
+        }
+    }
+    else
+    {
+        Console.WriteLine("Custom image not found, falling back to default icon.");
+        UseFallbackIcon(fallbackIcon);
+    }
+}
+
+
+        // Helper function to set the fallback icon
+        private void UseFallbackIcon(Image icon)
+        {
+            if (icon != null)
+            {
+                // Set the appropriate size mode based on the icon size
+                pictureBox1.SizeMode = icon.Height < pictureBox1.Height ? PictureBoxSizeMode.CenterImage : PictureBoxSizeMode.Zoom;
+                pictureBox1.Image = icon;
+            }
         }
 
 
@@ -140,7 +198,7 @@ namespace BepInEx.SplashScreen
             _pluginPercentDone = Math.Min(100, Math.Max(Math.Max(0, percentDone), _pluginPercentDone));
             UpdateProgress();
         }
-        
+
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);

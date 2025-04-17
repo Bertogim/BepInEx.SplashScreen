@@ -20,6 +20,15 @@ namespace BepInEx.SplashScreen
         #region Windows Form Designer generated code
         private void InitializeComponent()
         {
+            int fixedWidth = 768;
+            float scale = (float)fixedWidth / 768;
+            int scaledHeight = (int)(472 * scale);
+
+            int labelHeight = 30;
+            int progressHeight = 10;
+            int totalHeight = scaledHeight + labelHeight + progressHeight;
+
+
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SplashScreen));
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.labelBot = new System.Windows.Forms.Label();
@@ -31,29 +40,33 @@ namespace BepInEx.SplashScreen
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Dock = DockStyle.Fill;
-            this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.Image = Image.FromFile(System.IO.Path.Combine(Application.StartupPath, "LoadingImage.png"));
+            this.pictureBox1.Dock = DockStyle.None;
+            this.pictureBox1.Size = new Size(fixedWidth, scaledHeight);
+            this.pictureBox1.Location = new Point(0, 0);
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
+            this.pictureBox1.BackColor = Color.Black;
 
             // 
             // labelTop
             // 
             this.labelBot.AutoSize = false;
-            this.labelBot.BackColor = Color.FromArgb(160, 0, 0, 0); // semi-transparente
+            this.labelBot.BackColor = Color.FromArgb(160, 0, 0, 0); // semi-transparent
             this.labelBot.ForeColor = Color.White;
             this.labelBot.Font = new Font("Segoe UI", 11, FontStyle.Bold);
             this.labelBot.Dock = DockStyle.Bottom;
             this.labelBot.TextAlign = ContentAlignment.MiddleCenter;
-            this.labelBot.Height = 30;
+            this.labelBot.Size = new Size(fixedWidth, labelHeight);
+            this.labelBot.Location = new Point(0, scaledHeight);
             this.labelBot.Text = "Initializing...";
 
             // 
             // progressBar1
             // 
             this.progressBar1.Dock = DockStyle.Bottom;
-            this.progressBar1.Height = 10;
+            this.progressBar1.Size = new Size(fixedWidth, progressHeight);
+            this.progressBar1.Location = new Point(0, scaledHeight + labelHeight);
             this.progressBar1.Style = ProgressBarStyle.Continuous;
             this.progressBar1.ForeColor = Color.LimeGreen;
             this.progressBar1.Value = 0;
@@ -75,19 +88,19 @@ namespace BepInEx.SplashScreen
             this.checkedListBox1.UseTabStops = false;
             this.checkedListBox1.Visible = false;
 
-            this.MouseDown += Form_MouseDown;
-            this.MouseMove += Form_MouseMove;
-            this.MouseUp += Form_MouseUp;
+            //this.MouseDown += Form_MouseDown;
+            //this.MouseMove += Form_MouseMove;
+            //this.MouseUp += Form_MouseUp;
 
-            this.pictureBox1.MouseDown += Form_MouseDown;
-            this.pictureBox1.MouseMove += Form_MouseMove;
-            this.pictureBox1.MouseUp += Form_MouseUp;
+            //this.pictureBox1.MouseDown += Form_MouseDown;
+            //this.pictureBox1.MouseMove += Form_MouseMove;
+            //this.pictureBox1.MouseUp += Form_MouseUp;
 
             // 
             // SplashScreen
             // 
             this.AutoScaleMode = AutoScaleMode.None;
-            this.ClientSize = new System.Drawing.Size(768, 472);
+            this.ClientSize = new Size(fixedWidth, totalHeight); //(768, 472); //(512, 328);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.labelBot);
             this.Controls.Add(this.pictureBox1);
@@ -97,7 +110,6 @@ namespace BepInEx.SplashScreen
             this.Name = "LoadingScreen";
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Text = "The game is loading...";
-            //this.TopMost = true;
             this.ShowInTaskbar = false;
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
