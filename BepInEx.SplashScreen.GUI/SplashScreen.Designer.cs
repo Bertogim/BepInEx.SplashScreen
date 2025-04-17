@@ -20,9 +20,9 @@ namespace BepInEx.SplashScreen
         #region Windows Form Designer generated code
         private void InitializeComponent()
         {
-            int fixedWidth = 768;
-            float scale = (float)fixedWidth / 768;
-            int scaledHeight = (int)(472 * scale);
+            int fixedWidth = 640;
+            float scale = (float)fixedWidth / 640;
+            int scaledHeight = (int)(360 * scale);
 
             int labelHeight = 30;
             int progressHeight = 10;

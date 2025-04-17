@@ -106,7 +106,7 @@ public void SetIcon(Image fallbackIcon)
             Image img = Image.FromFile(imagePath);
 
             // Fixed width for the form
-            int fixedWidth = 768;
+            int fixedWidth = 640;
 
             // Calculate scaled height to maintain aspect ratio
             float scale = (float)fixedWidth / img.Width;
