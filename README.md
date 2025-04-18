@@ -1,6 +1,8 @@
 ![Loading preview](https://raw.githubusercontent.com/Bertogim/BepInEx.SplashScreen/refs/heads/main/example.png)
 
-## Custom image (Recommended)
+This is a cool mod if you want to disable the console and have a visible loading bar! It's also very useful for tracking progress when loading large modpacks.
+
+## Custom image
 To add a custom image, add a file named LoadingImage.png in the same folder as the LoadingScreen.GUI.exe file
 
 ## About the fork
@@ -18,7 +20,7 @@ The patcher and GUI app have evolved from a very old version of [risk-of-thunder
 > 🛠️ This is a fork of the original project [BepInEx/BepInEx.SplashScreen](https://github.com/BepInEx/BepInEx.SplashScreen), with possible modifications or repackaging by the forking author.
 
 ## How to use
-1. Install [BepInEx](https://github.com/BepInEx/BepInEx) 5.4.11 or later, or 6.0.0-be.674 or later (works on both mono and IL2CPP).
+1. Install [BepInEx](https://github.com/Bertogim/BepInEx) 5.4.11 or later, or 6.0.0-be.674 or later (works on both mono and IL2CPP).
 2. Download latest release for your BepInEx version.
 3. Extract the release so that the patcher files end up inside `BepInEx\patchers`.
 4. You should now see the splash screen appear on game start-up, assuming BepInEx is configured properly.
@@ -27,10 +29,10 @@ The patcher and GUI app have evolved from a very old version of [risk-of-thunder
 1. Make sure that `LoadingScreen.GUI.exe` and `BepInEx.SplashScreen.Patcher.dll` are both present inside the `BepInEx\patchers` folder.
 2. Check if the splash screen isn't disabled in `BepInEx\config\BepInEx.cfg`. If you can't see this file or the SplashScreen Enable setting, it means either BepInEx isn't correctly configured or this patcher is failing to start for some reason.
 3. Update BepInEx 5 to latest version and make sure that it is running.
-4. If the splash screen still does not appear, check the game log for any errors or exceptions. You can report issues on [GitHub](https://github.com/BepInEx/BepInEx.SplashScreen/issues).
+4. If the splash screen still does not appear, check the game log for any errors or exceptions. You can report issues on [GitHub](https://github.com/Bertogim/BepInEx.SplashScreen/issues).
 
 ## Contributing
-Feel free to start issues, and by all means submit some PRs! Contributions should be submitted to the repository at https://github.com/BepInEx/BepInEx.SplashScreen.
+Feel free to start issues, and by all means submit some PRs! Contributions should be submitted to the repository at https://github.com/Bertogim/BepInEx.SplashScreen.
 
 You can discuss changes and talk with other modders on the [official BepInEx Discord server](https://discord.gg/MpFEDAg).
 
