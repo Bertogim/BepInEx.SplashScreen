@@ -137,7 +137,7 @@ namespace BepInEx.SplashScreen
                             continue;
                         }
 
-                        Log(line, true);
+                        //Log(line, true); //For testing
                         ProcessInputMessage(line);
                     }
                 }
