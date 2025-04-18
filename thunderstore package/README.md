@@ -10,6 +10,9 @@ BepInEx.SplashScreen.GUI.exe is renamed to LoadingScreen.GUI.exe to try to fix d
 
 This fork is only tested with Lethal Company but it should work with other games
 
+## Got issues or feedback?
+Feel free to open an issue at https://github.com/Bertogim/BepInEx.SplashScreen/issues
+
 # BepInEx Loading Progress Splash Screen
 A BepInEx patcher that displays a loading screen on game startup with information about patchers and plugins being currently loaded. It's best suited for games where patchers and plugins take a long time to initialize.
 

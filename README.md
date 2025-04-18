@@ -10,6 +10,9 @@ BepInEx.SplashScreen.GUI.exe is renamed to LoadingScreen.GUI.exe to try to fix d
 
 This fork is only tested with Lethal Company but it should work with other games
 
+## Got issues or feedback?
+Feel free to open an issue at https://github.com/Bertogim/BepInEx.SplashScreen/issues
+
 # BepInEx Loading Progress Splash Screen
 A BepInEx patcher that displays a loading screen on game startup with information about patchers and plugins being currently loaded. It's best suited for games where patchers and plugins take a long time to initialize.
 
@@ -29,7 +32,7 @@ The patcher and GUI app have evolved from a very old version of [risk-of-thunder
 1. Make sure that `LoadingScreen.GUI.exe` and `BepInEx.SplashScreen.Patcher.dll` are both present inside the `BepInEx\patchers` folder.
 2. Check if the splash screen isn't disabled in `BepInEx\config\BepInEx.cfg`. If you can't see this file or the SplashScreen Enable setting, it means either BepInEx isn't correctly configured or this patcher is failing to start for some reason.
 3. Update BepInEx 5 to latest version and make sure that it is running.
-4. If the splash screen still does not appear, check the game log for any errors or exceptions. You can report issues on [GitHub](https://github.com/BepInEx/BepInEx.SplashScreen/issues).
+4. If the splash screen still does not appear, check the game log for any errors or exceptions. You can report issues on [GitHub](https://github.com/Bertogim/BepInEx.SplashScreen/issues).
 
 ## Contributing
 Feel free to start issues, and by all means submit some PRs! Contributions should be submitted to the repository at https://github.com/Bertogim/BepInEx.SplashScreen.
