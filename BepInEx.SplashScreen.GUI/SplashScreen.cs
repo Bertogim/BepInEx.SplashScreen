@@ -94,14 +94,9 @@ namespace BepInEx.SplashScreen
             labelBot.Text = msg;
         }
 
-public void SetIcon(Image fallbackIcon)
-{
-    string imagePath = System.IO.Path.Combine(Application.StartupPath, "LoadingImage.png");
-
-    if (File.Exists(imagePath))
-    {
-        try
+        public void SetIconImage(string imagePath, Image fallbackIcon)
         {
+
             // Load the image from file
             Image img = Image.FromFile(imagePath);
 
@@ -131,18 +126,43 @@ public void SetIcon(Image fallbackIcon)
             progressBar1.Size = new Size(fixedWidth, progressHeight);
             progressBar1.Location = new Point(0, scaledHeight + labelHeight);
         }
-        catch (Exception ex)
+
+
+
+
+        public void SetIcon(Image fallbackIcon)
         {
-            Console.WriteLine("Error loading the custom image, falling back to default icon: " + ex.Message);
-            UseFallbackIcon(fallbackIcon);
+            string imagePath = System.IO.Path.Combine(Application.StartupPath, "LoadingImage.png");
+
+            if (File.Exists(imagePath))
+            {
+                SetIconImage(imagePath, fallbackIcon);
+            }
+            else
+            {
+                string bepinexDirectory = System.IO.Path.GetFullPath(Path.Combine(Application.StartupPath, @"../../"));
+                string pluginsPath = System.IO.Path.Combine(bepinexDirectory, "plugins");
+
+                if (Directory.Exists(pluginsPath))
+                {
+                    string[] files = System.IO.Directory.GetFiles(pluginsPath, "LoadingImage.png", SearchOption.AllDirectories);
+                    if (files.Length > 0 && File.Exists(files[0]))
+                    {
+                        SetIconImage(files[0], fallbackIcon);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Custom image not found, falling back to default icon.");
+                        UseFallbackIcon(fallbackIcon);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Plugins directory not found, falling back to default icon.");
+                    UseFallbackIcon(fallbackIcon);
+                }
+            }
         }
-    }
-    else
-    {
-        Console.WriteLine("Custom image not found, falling back to default icon.");
-        UseFallbackIcon(fallbackIcon);
-    }
-}
 
 
         // Helper function to set the fallback icon
