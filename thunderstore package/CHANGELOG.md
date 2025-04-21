@@ -1,7 +1,10 @@
 ## Future Ideas
 - Lethal Level Loader support
 
-## v1.0.3 (Current version)
+## v1.0.4 (Current version)
+- Fixed a lot of things in the custom loading screen (Idea and help by @glacialstage on discord)
+
+## v1.0.3
 - Added loading image support for plugins (Idea and help by @glacialstage on discord)
 
 ## v1.0.2

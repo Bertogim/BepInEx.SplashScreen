@@ -12,11 +12,11 @@ namespace BepInEx.SplashScreen
         private const string DoneStr = "...Done";
         private string _gameLocation;
         private int _pluginPercentDone;
+        private readonly Action<string, bool> _logAction;
 
-
-
-        public SplashScreen()
+        public SplashScreen(Action<string, bool> logAction)
         {
+            _logAction = logAction;
             InitializeComponent();
 
             progressBar1.Minimum = 0;
@@ -94,7 +94,7 @@ namespace BepInEx.SplashScreen
             labelBot.Text = msg;
         }
 
-        public void SetIconImage(string imagePath, Image fallbackIcon)
+        public void SetIconImage(string imagePath)
         {
 
             // Load the image from file
@@ -127,43 +127,86 @@ namespace BepInEx.SplashScreen
             progressBar1.Location = new Point(0, scaledHeight + labelHeight);
         }
 
-
-
-
-        public void SetIcon(Image fallbackIcon)
+        public static string BepInExRootPath
         {
-            string imagePath = System.IO.Path.Combine(Application.StartupPath, "LoadingImage.png");
-
-            if (File.Exists(imagePath))
+            get
             {
-                SetIconImage(imagePath, fallbackIcon);
-            }
-            else
-            {
-                string bepinexDirectory = System.IO.Path.GetFullPath(Path.Combine(Application.StartupPath, @"../../"));
-                string pluginsPath = System.IO.Path.Combine(bepinexDirectory, "plugins");
+                // Try to find BepInEx directory by searching upwards
+                string currentDir = Application.StartupPath;
+                int levelsUp = 0;
 
-                if (Directory.Exists(pluginsPath))
+                while (currentDir != null && levelsUp < 5)
                 {
-                    string[] files = System.IO.Directory.GetFiles(pluginsPath, "LoadingImage.png", SearchOption.AllDirectories);
-                    if (files.Length > 0 && File.Exists(files[0]))
+                    string bepInExPath = Path.Combine(currentDir, "BepInEx");
+                    if (Directory.Exists(bepInExPath))
                     {
-                        SetIconImage(files[0], fallbackIcon);
+                        return bepInExPath;
                     }
-                    else
-                    {
-                        Console.WriteLine("Custom image not found, falling back to default icon.");
-                        UseFallbackIcon(fallbackIcon);
-                    }
+
+                    // Move up one directory level
+                    currentDir = Directory.GetParent(currentDir)?.FullName;
+                    levelsUp++;
                 }
-                else
-                {
-                    Console.WriteLine("Plugins directory not found, falling back to default icon.");
-                    UseFallbackIcon(fallbackIcon);
-                }
+
+                // Return empty string
+                return "";
             }
         }
 
+        public void SetIcon(Image fallbackIcon)
+        {
+            try
+            {
+                // Check if root path is null or empty
+                if (string.IsNullOrEmpty(BepInExRootPath))
+                {
+                    _logAction?.Invoke("Couldn't find BepInEx root directory, using fallback icon", true);
+                    UseFallbackIcon(fallbackIcon);
+                    return;
+                }
+
+                // 1. First check in patchers/Bertogim-LoadingScreen for any image file
+                string patchersPath = Path.Combine(BepInExRootPath, "patchers");
+                string patcherFolderPath = Path.Combine(patchersPath, "Bertogim-LoadingScreen");
+
+                if (Directory.Exists(patcherFolderPath))
+                {
+                    string[] patcherImages = Directory.GetFiles(patcherFolderPath, "*.png");
+                    if (patcherImages.Length > 0)
+                    {
+                        _logAction?.Invoke("Using loading image: " + patcherImages[0], false);
+                        SetIconImage(patcherImages[0]);
+                        return;
+                    }
+                }
+
+                // 2. Then check in plugins/LoadingScreen/LoadingImage.png
+                string pluginsPath = Path.Combine(BepInExRootPath, "plugins");
+                if (Directory.Exists(pluginsPath))
+                {
+                    string[] loadingScreenFolders = Directory.GetDirectories(pluginsPath, "LoadingScreen", SearchOption.AllDirectories);
+                    foreach (var folder in loadingScreenFolders)
+                    {
+                        string imagePath = Path.Combine(folder, "LoadingImage.png");
+                        if (File.Exists(imagePath))
+                        {
+                            _logAction?.Invoke("Using loading image: " + imagePath, false);
+                            SetIconImage(imagePath);
+                            return;
+                        }
+                    }
+                }
+
+                // If all checks fail, use fallback
+                _logAction?.Invoke("No suitable loading image found, using fallback icon", false);
+                UseFallbackIcon(fallbackIcon);
+            }
+            catch (Exception ex)
+            {
+                _logAction?.Invoke($"Error setting icon: {ex.Message}", true);
+                UseFallbackIcon(fallbackIcon);
+            }
+        }
 
         // Helper function to set the fallback icon
         private void UseFallbackIcon(Image icon)
@@ -227,3 +270,5 @@ namespace BepInEx.SplashScreen
 
     }
 }
+
+

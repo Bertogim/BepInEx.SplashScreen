@@ -43,7 +43,7 @@ namespace BepInEx.SplashScreen
                     return;
                 }
 
-                _mainForm = new SplashScreen();
+                _mainForm = new SplashScreen((message, error) => Log(message, error));
                 _mainForm.Show();
 
                 var pid = int.Parse(args.Last());
