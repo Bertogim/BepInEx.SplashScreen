@@ -1,7 +1,10 @@
 ## Future Ideas
 - Lethal Level Loader support
 
-## v1.0.4 (Current version)
+## v1.0.5 (Current version)
+- Made readme more clear (No functional changes, but it really needed it)
+
+## v1.0.4
 - Fixed a lot of things in the custom loading screen (Idea and help by @glacialstage on discord)
 
 ## v1.0.3

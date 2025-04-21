@@ -7,8 +7,6 @@ This is a cool mod if you want to disable the console and have a visible loading
 
 - If you're making a modpack and want to add or override a mod's loading image, simply place your `LoadingImage.png` (you can name it whatever you want in this case) inside `BepInEx/patchers/Bertogim-LoadingScreen`.
 
-¿Quieres que lo deje más técnico o más amigable/casual?
-
 ## About the fork
 BepInEx.SplashScreen.GUI.exe is renamed to LoadingScreen.GUI.exe to try to fix discord activity detecting the loading screen as other game
 
@@ -22,9 +20,7 @@ A BepInEx patcher that displays a loading screen on game startup with informatio
 
 This patcher is mostly meant for inclusion in modpacks to give end-users immediate feedback after starting a heavily modded game. It can sometimes take a long time for the game window to appear and/or become responsive - especially on slow systems - which can be interpretted by the user as the game crashing.
 
-The patcher and GUI app have evolved from a very old version of [risk-of-thunder/BepInEx.GUI](https://github.com/risk-of-thunder/BepInEx.GUI), though at this point most of the code has been rewritten and this version works in all games. That being said, if you are modding Risk Of Rain 2, use risk-of-thunder/BepInEx.GUI for a better experience.
-
-> 🛠️ This is a fork of the original project [BepInEx/BepInEx.SplashScreen](https://github.com/BepInEx/BepInEx.SplashScreen), with possible modifications or repackaging by the forking author.
+> 🛠️ This project is a fork that combines elements from both [BepInEx/BepInEx.SplashScreen](https://github.com/BepInEx/BepInEx.SplashScreen) and an early version of [risk-of-thunder/BepInEx.GUI](https://github.com/risk-of-thunder/BepInEx.GUI), with significant modifications and repackaging. While the original GUI code served as a starting point, most of it has been rewritten.
 
 ## How to use
 1. Install [BepInEx](https://github.com/BepInEx/BepInEx) 5.4.15 or later, or 6.0.0-be.674 or later (works on both mono and IL2CPP).
