@@ -1,7 +1,14 @@
 ## Future Ideas
 - Lethal Level Loader support
 
-## v1.0.5 (Current version)
+## v1.0.6 (Current version)
+- If you close the loading window, the game will close too.
+- You can now minimize the window.
+- You can move the loading window now.
+- Loading window will now appear in taskbar with the LC icon.
+- Progress in the taskbar icon.
+
+## v1.0.5
 - Made readme more clear (No functional changes, but it really needed it)
 
 ## v1.0.4

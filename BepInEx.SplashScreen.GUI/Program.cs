@@ -16,7 +16,7 @@ namespace BepInEx.SplashScreen
     {
         private static SplashScreen _mainForm;
 
-        private static readonly System.Timers.Timer _AliveTimer = new System.Timers.Timer(20000); //20 seconds
+        private static readonly System.Timers.Timer _AliveTimer = new System.Timers.Timer(30000); //30 seconds
 
         /// <summary>
         /// The main entry point for the application.
@@ -43,18 +43,17 @@ namespace BepInEx.SplashScreen
                     return;
                 }
 
-                _mainForm = new SplashScreen((message, error) => Log(message, error));
-                _mainForm.Show();
-
                 var pid = int.Parse(args.Last());
                 var gameProcess = Process.GetProcessById(pid);
+
+                _mainForm = new SplashScreen((message, error) => Log(message, error), gameProcess); _mainForm.Show();
 
                 BeginReadingInput(gameProcess);
 
                 try
                 {
                     // Get game name
-                    _mainForm.Text = $@"{gameProcess.ProcessName} is loading...";
+                    _mainForm.Text = $@"{gameProcess.ProcessName}";
 
                     if (gameProcess.MainModule == null)
                         throw new FileNotFoundException("gameProcess.MainModule is null");
@@ -188,7 +187,7 @@ namespace BepInEx.SplashScreen
                         break;
                     case "Chainloader startup complete": //bep5 and bep6
                         RunEventsUpTo(LoadEvent.ChainloaderFinish);
-                        Thread.Sleep(5000); // 5 seconds
+                        Thread.Sleep(5000); // 5 seconds // Does this hide zeekers logo with low mod count modpacks?
                         RunEventsUpTo(LoadEvent.LoadFinished);
                         break;
 
@@ -238,7 +237,6 @@ namespace BepInEx.SplashScreen
         #endregion
 
         #region Window poisition snap
-        public static bool isGameLoaded = false;
 
         private static void BeginSnapPositionToGameWindow(Process gameProcess)
         {
@@ -312,7 +310,6 @@ namespace BepInEx.SplashScreen
                         // At this point the form is snapped to the main game window so prevent user from trying to drag it
                         _mainForm.FormBorderStyle = FormBorderStyle.None;
                         //_mainForm.BackColor = Color.White;
-                        isGameLoaded = true;
                         _mainForm.PerformLayout();
                     }
                 }

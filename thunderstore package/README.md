@@ -20,10 +20,10 @@ A BepInEx patcher that displays a loading screen on game startup with informatio
 
 This patcher is mostly meant for inclusion in modpacks to give end-users immediate feedback after starting a heavily modded game. It can sometimes take a long time for the game window to appear and/or become responsive - especially on slow systems - which can be interpretted by the user as the game crashing.
 
-> 🛠️ This project is a fork that combines elements from both [BepInEx/BepInEx.SplashScreen](https://github.com/BepInEx/BepInEx.SplashScreen) and an early version of [risk-of-thunder/BepInEx.GUI](https://github.com/risk-of-thunder/BepInEx.GUI), with significant modifications and repackaging. While the original GUI code served as a starting point, most of it has been rewritten.
+> 🛠️ This project is a fork of [BepInEx/BepInEx.SplashScreen](https://github.com/BepInEx/BepInEx.SplashScreen) wich is a fork of an early version of [risk-of-thunder/BepInEx.GUI](https://github.com/risk-of-thunder/BepInEx.GUI), with significant modifications and repackaging. While the original GUI code served as a starting point, most of it has been rewritten.
 
 ## How to use
-1. Install [BepInEx](https://github.com/BepInEx/BepInEx) 5.4.15 or later, or 6.0.0-be.674 or later (works on both mono and IL2CPP).
+1. Install [BepInEx](https://github.com/BepInEx/BepInEx) 5.4.15 or later, or 6.0.0-be.674 or later (works on both mono and IL2CPP). (This fork does not support BepInEx 6)
 2. Download latest release for your BepInEx version.
 3. Extract the release so that the patcher files end up inside `BepInEx\patchers`.
 4. You should now see the splash screen appear on game start-up, assuming BepInEx is configured properly.

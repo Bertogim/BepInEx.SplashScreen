@@ -88,14 +88,6 @@ namespace BepInEx.SplashScreen
             this.checkedListBox1.UseTabStops = false;
             this.checkedListBox1.Visible = false;
 
-            //this.MouseDown += Form_MouseDown;
-            //this.MouseMove += Form_MouseMove;
-            //this.MouseUp += Form_MouseUp;
-
-            //this.pictureBox1.MouseDown += Form_MouseDown;
-            //this.pictureBox1.MouseMove += Form_MouseMove;
-            //this.pictureBox1.MouseUp += Form_MouseUp;
-
             // 
             // SplashScreen
             // 
@@ -105,12 +97,13 @@ namespace BepInEx.SplashScreen
             this.Controls.Add(this.labelBot);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.checkedListBox1);
-            this.FormBorderStyle = FormBorderStyle.None;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Name = "LoadingScreen";
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Text = "The game is loading...";
-            this.ShowInTaskbar = false;
+            this.ShowInTaskbar = true;
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
         }

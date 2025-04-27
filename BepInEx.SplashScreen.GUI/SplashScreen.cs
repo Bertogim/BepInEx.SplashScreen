@@ -1,29 +1,144 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Drawing;
+using System.Diagnostics;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 using System.IO;
 
 namespace BepInEx.SplashScreen
 {
     public partial class SplashScreen : Form
     {
+        private const uint WM_SETICON = 0x0080;
+        private const int ICON_SMALL = 0;
+        private const int ICON_BIG = 1;
+
+        private void SetExeIcon()
+        {
+            // Get the first icon from the executable
+            Icon exeIcon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+
+            // Set both big and small icons
+            this.Icon = exeIcon;
+            SendMessage(this.Handle, WM_SETICON, (IntPtr)ICON_SMALL, exeIcon.Handle);
+            SendMessage(this.Handle, WM_SETICON, (IntPtr)ICON_BIG, exeIcon.Handle);
+        }
+        // Windows API imports for taskbar progress
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("shell32.dll")]
+        private static extern void SetCurrentProcessExplicitAppUserModelID([MarshalAs(UnmanagedType.LPWStr)] string AppID);
+
+        // SendMessage
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        // Taskbar progress COM interface
+        [ComImport()]
+        [Guid("ea1afb91-9e28-4b86-90e9-9e9f8a5eefaf")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface ITaskbarList3
+        {
+            void HrInit();
+            void AddTab(IntPtr hwnd);
+            void DeleteTab(IntPtr hwnd);
+            void ActivateTab(IntPtr hwnd);
+            void SetActiveAlt(IntPtr hwnd);
+            void MarkFullscreenWindow(IntPtr hwnd, [MarshalAs(UnmanagedType.Bool)] bool fFullscreen);
+            void SetProgressValue(IntPtr hwnd, ulong ullCompleted, ulong ullTotal);
+            void SetProgressState(IntPtr hwnd, TaskbarProgressState tbpFlags);
+        }
+
+        [Guid("56FDF344-FD6D-11d0-958A-006097C9A090")]
+        [ClassInterface(ClassInterfaceType.None)]
+        [ComImport()]
+        private class TaskbarInstance { }
+
+        private enum TaskbarProgressState
+        {
+            NoProgress = 0,
+            Indeterminate = 0x1,
+            Normal = 0x2,
+            Error = 0x4,
+            Paused = 0x8
+        }
+
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_APPWINDOW = 0x40000;
+        private const string AppUserModelID = "BepInEx.SplashScreen";
+        private ITaskbarList3 _taskbar;
+
         private const string WorkingStr = "...";
         private const string DoneStr = "...Done";
         private string _gameLocation;
         private int _pluginPercentDone;
         private readonly Action<string, bool> _logAction;
+        private readonly Process _gameProcess;
+        private bool _closedByScript = false;
 
-        public SplashScreen(Action<string, bool> logAction)
+
+        public SplashScreen(Action<string, bool> logAction, Process gameProcess)
         {
             _logAction = logAction;
+            _gameProcess = gameProcess;
             InitializeComponent();
+            SetExeIcon();
+
+                        // Handle form closing
+            this.FormClosed += (sender, e) => 
+            {
+                if (!_closedByScript && !_gameProcess.HasExited)
+                {
+                    _logAction?.Invoke("Splash screen closed unexpectedly - terminating game process", true);
+                    _gameProcess.Kill();
+                }
+            };
+
+            // Initialize taskbar progress (Windows 7+)
+            try
+            {
+                _taskbar = (ITaskbarList3)new TaskbarInstance();
+                _taskbar.HrInit();
+            }
+            catch
+            {
+                _taskbar = null;
+            }
+
+            // Set AppUserModelID
+            SetCurrentProcessExplicitAppUserModelID(AppUserModelID);
 
             progressBar1.Minimum = 0;
             progressBar1.Maximum = 100 + checkedListBox1.Items.Count * 15;
             progressBar1.Value = 0;
 
             AppendToItem(0, WorkingStr);
+
+            // Force window to appear in taskbar
+            this.ShowInTaskbar = true;
+            int currentStyle = GetWindowLong(this.Handle, GWL_EXSTYLE).ToInt32();
+            SetWindowLong(this.Handle, GWL_EXSTYLE, currentStyle | WS_EX_APPWINDOW);
+        }
+
+        private void UpdateProgress()
+        {
+            int newValue = checkedListBox1.CheckedItems.Count * 15 + _pluginPercentDone;
+            progressBar1.Value = newValue;
+
+            // Update taskbar progress
+            if (_taskbar != null)
+            {
+                _taskbar.SetProgressState(this.Handle, TaskbarProgressState.Normal);
+                _taskbar.SetProgressValue(
+                    this.Handle,
+                    (ulong)newValue,
+                    (ulong)progressBar1.Maximum
+                );
+            }
         }
 
         public void ProcessEvent(LoadEvent e)
@@ -61,7 +176,8 @@ namespace BepInEx.SplashScreen
                 case LoadEvent.LoadFinished:
                     //AppendToItem(3, "Done");
                     //checkedListBox1.SetItemCheckState(3, CheckState.Checked);
-                    Environment.Exit(0);
+                    //Environment.Exit(0);
+                    SafeClose();
                     return;
 
                 default:
@@ -72,16 +188,18 @@ namespace BepInEx.SplashScreen
             checkedListBox1.Invalidate();
         }
 
+                public void SafeClose()
+        {
+            _closedByScript = true;
+            this.Close();
+        }
+
         private void AppendToItem(int index, string str)
         {
             var current = checkedListBox1.Items[index].ToString();
             checkedListBox1.Items[index] = current + str;
         }
 
-        private void UpdateProgress()
-        {
-            progressBar1.Value = checkedListBox1.CheckedItems.Count * 15 + _pluginPercentDone;
-        }
         public void SetStatusMain(string msg)
         {
             if (!string.IsNullOrEmpty(msg))
@@ -219,50 +337,13 @@ namespace BepInEx.SplashScreen
             }
         }
 
-
-
-        private void Button1_Click(object sender, EventArgs e)
-        {
-            if (Program.isGameLoaded == false)
-            {
-                Process.Start(_gameLocation);
-            }
-        }
-
-        private void Form_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (Program.isGameLoaded == false)
-            {
-                dragging = true;
-                dragCursorPoint = Cursor.Position;
-                dragFormPoint = this.Location;
-            }
-        }
-
-        private void Form_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (Program.isGameLoaded == false)
-            {
-                if (dragging)
-                {
-                    Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
-                    this.Location = Point.Add(dragFormPoint, new Size(diff));
-                }
-            }
-        }
-
-        private void Form_MouseUp(object sender, MouseEventArgs e)
-        {
-            dragging = false;
-        }
-
         public void SetPluginProgress(int percentDone)
         {
             _pluginPercentDone = Math.Min(100, Math.Max(Math.Max(0, percentDone), _pluginPercentDone));
             UpdateProgress();
         }
 
-        protected override void OnActivated(EventArgs e)
+        protected override void OnActivated(EventArgs e) // Is this even used?
         {
             base.OnActivated(e);
             this.TopMost = true;
