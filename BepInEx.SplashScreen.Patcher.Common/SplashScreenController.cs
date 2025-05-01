@@ -34,7 +34,7 @@ namespace BepInEx.SplashScreen
                 
                 var windowType = config.Bind("SplashScreen", "WindowType", "FakeGame", "FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears \nFixedWindow = A fixed loading screen on top of all windows, cant move or close (Same behavior as v1.0.5 and less)").Value;
                 
-                var extraWaitTime = config.Bind("SplashScreen", "ExtraWaitTime", "5", "Seconds extra to mantain the loading screen starting when the game window shows up \nGood for big modpacks where the lethal company window stays blank").Value;
+                var extraWaitTime = config.Bind("SplashScreen", "ExtraWaitTime", "5", "Seconds extra to mantain the loading screen starting when the game window shows up \nGood for big modpacks where the lethal company window stays blank loading for a few seconds").Value;
                 if (!isEnabled)
                 {
                     Logger.LogDebug("Not showing splash because the Enabled setting is off");

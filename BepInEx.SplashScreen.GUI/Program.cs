@@ -164,6 +164,32 @@ namespace BepInEx.SplashScreen
             }
         }
 
+        public static string BepInExRootPath
+        {
+            get
+            {
+                // Try to find BepInEx directory by searching upwards
+                string currentDir = Application.StartupPath;
+                int levelsUp = 0;
+
+                while (currentDir != null && levelsUp < 5)
+                {
+                    string bepInExPath = Path.Combine(currentDir, "BepInEx");
+                    if (Directory.Exists(bepInExPath))
+                    {
+                        return bepInExPath;
+                    }
+
+                    // Move up one directory level
+                    currentDir = Directory.GetParent(currentDir)?.FullName;
+                    levelsUp++;
+                }
+
+                // Return empty string
+                return "";
+            }
+        }
+
         private static void ProcessInputMessage(string message)
         {
             try
