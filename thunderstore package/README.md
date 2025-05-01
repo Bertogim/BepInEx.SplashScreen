@@ -15,6 +15,17 @@ This fork is only tested with Lethal Company but it should work with other games
 ## Got issues or feedback?
 Feel free to open an issue at https://github.com/Bertogim/BepInEx.SplashScreen/issues
 
+## WindowType config
+FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears 
+
+FixedWindow = A fixed loading screen on top of all windows, cant move or close (Same behavior as v1.0.5 and less)
+
+Config can be seen in `BepInEx\config\BepInEx.cfg`
+
+You can also disable the console there (`[Logging.Console]` >
+`Enabled = false`), since the loading window will act as the game with `FakeGame`
+
+
 # BepInEx Loading Progress Splash Screen
 A BepInEx patcher that displays a loading screen on game startup with information about patchers and plugins being currently loaded. It's best suited for games where patchers and plugins take a long time to initialize.
 

@@ -50,7 +50,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>LethalCompany.ico</ApplicationIcon>
+    <ApplicationIcon>bepinex.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup />

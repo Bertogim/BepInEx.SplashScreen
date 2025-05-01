@@ -311,6 +311,8 @@ namespace BepInEx.SplashScreen
                         _mainForm.FormBorderStyle = FormBorderStyle.None;
                         //_mainForm.BackColor = Color.White;
                         _mainForm.PerformLayout();
+                        //Game window starts?
+                        _mainForm.ShowInTaskbar = false;
                     }
                 }
             }

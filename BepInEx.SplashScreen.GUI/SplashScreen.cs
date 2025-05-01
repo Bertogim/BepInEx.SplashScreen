@@ -13,15 +13,34 @@ namespace BepInEx.SplashScreen
         private const int ICON_SMALL = 0;
         private const int ICON_BIG = 1;
 
-        private void SetExeIcon()
+        private void SetExeIcon(Process gameProcess)
         {
-            // Get the first icon from the executable
-            Icon exeIcon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+            // Validate the process
+            if (gameProcess == null || gameProcess.HasExited)
+                return;
 
-            // Set both big and small icons
-            this.Icon = exeIcon;
-            SendMessage(this.Handle, WM_SETICON, (IntPtr)ICON_SMALL, exeIcon.Handle);
-            SendMessage(this.Handle, WM_SETICON, (IntPtr)ICON_BIG, exeIcon.Handle);
+            try
+            {
+                // Get the game's executable path
+                string gameExePath = gameProcess.MainModule?.FileName;
+
+                if (!string.IsNullOrEmpty(gameExePath))
+                {
+                    // Extract the icon from the game's EXE
+                    Icon gameIcon = Icon.ExtractAssociatedIcon(gameExePath);
+
+                    // Apply to our window
+                    this.Icon = gameIcon;
+                    SendMessage(this.Handle, WM_SETICON, (IntPtr)ICON_SMALL, gameIcon.Handle);
+                    SendMessage(this.Handle, WM_SETICON, (IntPtr)ICON_BIG, gameIcon.Handle);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to set game icon: {ex.Message}");
+                // Fallback to our app icon
+                this.Icon = SystemIcons.Application;
+            }
         }
         // Windows API imports for taskbar progress
         [DllImport("user32.dll")]
@@ -86,10 +105,10 @@ namespace BepInEx.SplashScreen
             _logAction = logAction;
             _gameProcess = gameProcess;
             InitializeComponent();
-            SetExeIcon();
+            SetExeIcon(_gameProcess);
 
-                        // Handle form closing
-            this.FormClosed += (sender, e) => 
+            // Handle form closing
+            this.FormClosed += (sender, e) =>
             {
                 if (!_closedByScript && !_gameProcess.HasExited)
                 {
@@ -171,6 +190,9 @@ namespace BepInEx.SplashScreen
                     AppendToItem(3, WorkingStr);
                     SetStatusMain("Finished loading plugins.");
                     SetStatusDetail("Waiting for the game to start...");//\nSome plugins might need more time to finish loading.");
+                    //Game window starts?
+                    //this.ShowInTaskbar = false; //Moved to program.cs 315
+                    
                     break;
 
                 case LoadEvent.LoadFinished:
@@ -188,7 +210,7 @@ namespace BepInEx.SplashScreen
             checkedListBox1.Invalidate();
         }
 
-                public void SafeClose()
+        public void SafeClose()
         {
             _closedByScript = true;
             this.Close();

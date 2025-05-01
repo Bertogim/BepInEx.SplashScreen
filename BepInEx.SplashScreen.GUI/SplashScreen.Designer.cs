@@ -101,7 +101,7 @@ namespace BepInEx.SplashScreen
             this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Name = "LoadingScreen";
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            //this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon"))); //This is v1.0.6 / Now it uses the game process icon
             this.Text = "The game is loading...";
             this.ShowInTaskbar = true;
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

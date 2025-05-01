@@ -25,13 +25,16 @@ namespace BepInEx.SplashScreen
                 var config = (ConfigFile)AccessTools.Property(typeof(ConfigFile), "CoreConfig").GetValue(null, null);
 
                 var isEnabled = config.Bind("SplashScreen", "Enabled", true, "Display a splash screen with information about game load progress on game start-up.").Value;
-#if DEBUG
+//#if DEBUG
                 const bool onlyNoConsoleDefault = false;
-#else
-                const bool onlyNoConsoleDefault = true;
-#endif
+//#else
+//                const bool onlyNoConsoleDefault = true;
+//#endif
                 var consoleNotAllowed = config.Bind("SplashScreen", "OnlyNoConsole", onlyNoConsoleDefault, "Only display the splash screen if the logging console is turned off.").Value;
-
+                
+                var windowType = config.Bind("SplashScreen", "WindowType", "FakeGame", "FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears \nFixedWindow = A fixed loading screen on top of all windows, cant move or close (Same behavior as v1.0.5 and less)").Value;
+                
+                var extraWaitTime = config.Bind("SplashScreen", "ExtraWaitTime", "5", "Seconds extra to mantain the loading screen starting when the game window shows up \nGood for big modpacks where the lethal company window stays blank").Value;
                 if (!isEnabled)
                 {
                     Logger.LogDebug("Not showing splash because the Enabled setting is off");
