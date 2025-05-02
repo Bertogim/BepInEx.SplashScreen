@@ -320,7 +320,7 @@ namespace BepInEx.SplashScreen
                     }
                 }
 
-                // 2. Then check in plugins/LoadingScreen/LoadingImage.png
+                // 2. Then check in plugins/*/LoadingScreen/LoadingImage.png
                 string pluginsPath = Path.Combine(BepInExRootPath, "plugins");
                 if (Directory.Exists(pluginsPath))
                 {

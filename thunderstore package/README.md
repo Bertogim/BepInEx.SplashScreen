@@ -3,7 +3,8 @@
 This is a cool mod if you want to disable the console and have a visible loading bar! It's also very useful for tracking progress when loading large modpacks.
 
 ## Custom loading image
-- If you're making a mod, create a folder named `LoadingImage` anywhere inside your mod, and place a `LoadingImage.png` file inside it.
+- If you're making a mod, create a folder named `LoadingScreen` anywhere inside your mod, and place a `LoadingImage.png` file inside it.
+The loading screen search is something like this: `BepInEx/plugins/*/LoadingScreen/LoadingImage.png`
 
 - If you're making a modpack and want to add or override a mod's loading image, simply place your `LoadingImage.png` (you can name it whatever you want in this case) inside `BepInEx/patchers/Bertogim-LoadingScreen`.
 
@@ -14,6 +15,10 @@ This fork is only tested with Lethal Company but it should work with other games
 
 ## Got issues or feedback?
 Feel free to open an issue at https://github.com/Bertogim/BepInEx.SplashScreen/issues
+
+Or you can open the discord thread: <br>
+[Open in app](discord://discordapp.com/channels/1168655651455639582/1364323192423977002) <br>
+[Open in browser](https://discordapp.com/channels/1168655651455639582/1364323192423977002)
 
 ## WindowType config
 FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears 
