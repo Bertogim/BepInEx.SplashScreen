@@ -23,7 +23,7 @@ Or you can open the discord thread: <br>
 ## WindowType config
 FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears 
 
-FixedWindow = A fixed loading screen on top of all windows, cant move or close (Same behavior as v1.0.5 and less)
+FixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less)
 
 Config can be seen in `BepInEx\config\BepInEx.cfg`
 

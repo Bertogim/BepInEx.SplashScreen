@@ -18,6 +18,8 @@ namespace BepInEx.SplashScreen
         }
 
         #region Windows Form Designer generated code
+        //Not anymore
+
         private void InitializeComponent()
         {
             int fixedWidth = 640;

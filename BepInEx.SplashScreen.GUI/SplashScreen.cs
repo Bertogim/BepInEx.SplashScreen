@@ -190,9 +190,9 @@ namespace BepInEx.SplashScreen
                     AppendToItem(3, WorkingStr);
                     SetStatusMain("Finished loading plugins.");
                     SetStatusDetail("Waiting for the game to start...");//\nSome plugins might need more time to finish loading.");
-                    //Game window starts?
-                    //this.ShowInTaskbar = false; //Moved to program.cs 315
-                    
+                                                                        //Game window starts?
+                                                                        //this.ShowInTaskbar = false; //Moved to program.cs 315
+
                     break;
 
                 case LoadEvent.LoadFinished:
@@ -233,6 +233,79 @@ namespace BepInEx.SplashScreen
         {
             labelBot.Text = msg;
         }
+        public static string GetBepInExConfigValue(string section, string key, string defaultValue = "")
+        {
+            string currentDir = Application.StartupPath;
+            int levelsUp = 0;
+
+            while (currentDir != null && levelsUp < 5)
+            {
+                string bepInExPath = Path.Combine(currentDir, "BepInEx");
+                if (Directory.Exists(bepInExPath))
+                {
+                    string configDir = Path.Combine(bepInExPath, "config");
+                    string configPath = Path.Combine(configDir, "BepInEx.cfg");
+
+                    if (File.Exists(configPath))
+                    {
+                        string[] configLines = File.ReadAllLines(configPath);
+                        bool inTargetSection = false;
+
+                        foreach (string line in configLines)
+                        {
+                            string trimmedLine = line.Trim();
+
+                            // Find the [SplashScreen] section
+                            if (trimmedLine.StartsWith($"[{section}]"))
+                            {
+                                inTargetSection = true;
+                                continue;
+                            }
+                            else if (trimmedLine.StartsWith("[") && inTargetSection)
+                            {
+                                // Exit if another section is found
+                                break;
+                            }
+
+                            // Find the key within the section
+                            if (inTargetSection && trimmedLine.StartsWith(key))
+                            {
+                                int equalsIndex = trimmedLine.IndexOf('=');
+                                if (equalsIndex > 0)
+                                {
+                                    string value = trimmedLine.Substring(equalsIndex + 1).Trim();
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                    return defaultValue;
+                }
+
+                // Go up one level in the directory
+                currentDir = Directory.GetParent(currentDir)?.FullName;
+                levelsUp++;
+            }
+
+            return defaultValue;
+        }
+        public static string SplashScreenWindowType => GetBepInExConfigValue("SplashScreen", "WindowType", "FakeGame");
+        public static int SplashScreenWindowWidth => int.Parse(GetBepInExConfigValue("SplashScreen", "WindowWidth", "640"));
+
+        public void CenterWindow()
+        {
+            this.StartPosition = FormStartPosition.Manual;
+
+            int screenWidth = Screen.PrimaryScreen.Bounds.Width;
+            int screenHeight = Screen.PrimaryScreen.Bounds.Height;
+            int formWidth = this.Width;
+            int formHeight = this.Height;
+
+            this.Location = new Point(
+                (screenWidth - formWidth) / 2,
+                (screenHeight - formHeight) / 2
+            );
+        }
 
         public void SetIconImage(string imagePath)
         {
@@ -241,7 +314,7 @@ namespace BepInEx.SplashScreen
             Image img = Image.FromFile(imagePath);
 
             // Fixed width for the form
-            int fixedWidth = 640;
+            int fixedWidth = SplashScreenWindowWidth;
 
             // Calculate scaled height to maintain aspect ratio
             float scale = (float)fixedWidth / img.Width;
@@ -265,6 +338,8 @@ namespace BepInEx.SplashScreen
 
             progressBar1.Size = new Size(fixedWidth, progressHeight);
             progressBar1.Location = new Point(0, scaledHeight + labelHeight);
+
+            CenterWindow();
         }
 
         public static string BepInExRootPath
@@ -297,6 +372,18 @@ namespace BepInEx.SplashScreen
         {
             try
             {
+
+                if (SplashScreenWindowType == "FakeGame")
+                {
+                    //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle; //Already default
+                    this.TopMost = false; //Till the game window shows up
+                }
+                if (SplashScreenWindowType == "FixedWindow")
+                {
+                    this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                    this.ShowInTaskbar = false;
+                }
+
                 // Check if root path is null or empty
                 if (string.IsNullOrEmpty(BepInExRootPath))
                 {
@@ -353,9 +440,32 @@ namespace BepInEx.SplashScreen
         {
             if (icon != null)
             {
-                // Set the appropriate size mode based on the icon size
+                // Fixed width for the form
+                int fixedWidth = SplashScreenWindowWidth;
+
+                // Calculate scaled height to maintain aspect ratio
+                float scale = (float)fixedWidth / 640;
+                int scaledHeight = (int)(360 * scale);
+
+                // Additional space for label and progress bar
+                int labelHeight = 30;
+                int progressHeight = 10;
+                int totalHeight = scaledHeight + labelHeight + progressHeight;
+
+                // Set form and picture box sizes
+                this.ClientSize = new Size(fixedWidth, totalHeight);
+
                 pictureBox1.SizeMode = icon.Height < pictureBox1.Height ? PictureBoxSizeMode.CenterImage : PictureBoxSizeMode.Zoom;
                 pictureBox1.Image = icon;
+
+                // Adjust label and progress bar positions
+                labelBot.Size = new Size(fixedWidth, labelHeight);
+                labelBot.Location = new Point(0, scaledHeight);
+
+                progressBar1.Size = new Size(fixedWidth, progressHeight);
+                progressBar1.Location = new Point(0, scaledHeight + labelHeight);
+
+                CenterWindow();
             }
         }
 

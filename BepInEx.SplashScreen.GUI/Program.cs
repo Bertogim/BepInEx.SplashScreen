@@ -189,6 +189,65 @@ namespace BepInEx.SplashScreen
                 return "";
             }
         }
+        public static string GetBepInExConfigValue(string section, string key, string defaultValue = "")
+        {
+            string currentDir = Application.StartupPath;
+            int levelsUp = 0;
+
+            while (currentDir != null && levelsUp < 5)
+            {
+                string bepInExPath = Path.Combine(currentDir, "BepInEx");
+                if (Directory.Exists(bepInExPath))
+                {
+                    string configDir = Path.Combine(bepInExPath, "config");
+                    string configPath = Path.Combine(configDir, "BepInEx.cfg");
+
+                    if (File.Exists(configPath))
+                    {
+                        string[] configLines = File.ReadAllLines(configPath);
+                        bool inTargetSection = false;
+
+                        foreach (string line in configLines)
+                        {
+                            string trimmedLine = line.Trim();
+
+                            // Find the [SplashScreen] section
+                            if (trimmedLine.StartsWith($"[{section}]"))
+                            {
+                                inTargetSection = true;
+                                continue;
+                            }
+                            else if (trimmedLine.StartsWith("[") && inTargetSection)
+                            {
+                                // Exit if another section is found
+                                break;
+                            }
+
+                            // Find the key within the section
+                            if (inTargetSection && trimmedLine.StartsWith(key))
+                            {
+                                int equalsIndex = trimmedLine.IndexOf('=');
+                                if (equalsIndex > 0)
+                                {
+                                    string value = trimmedLine.Substring(equalsIndex + 1).Trim();
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                    return defaultValue;
+                }
+
+                // Go up one level in the directory
+                currentDir = Directory.GetParent(currentDir)?.FullName;
+                levelsUp++;
+            }
+
+            return defaultValue;
+        }
+
+        public static string SplashScreenWindowType => GetBepInExConfigValue("SplashScreen", "WindowType", "FakeGame");
+        public static int SplashScreenExtraWaitTime => int.Parse(GetBepInExConfigValue("SplashScreen", "ExtraWaitTime", "5"));
 
         private static void ProcessInputMessage(string message)
         {
@@ -213,7 +272,7 @@ namespace BepInEx.SplashScreen
                         break;
                     case "Chainloader startup complete": //bep5 and bep6
                         RunEventsUpTo(LoadEvent.ChainloaderFinish);
-                        Thread.Sleep(5000); // 5 seconds // Does this hide zeekers logo with low mod count modpacks?
+                        Thread.Sleep(SplashScreenExtraWaitTime * 1000);
                         RunEventsUpTo(LoadEvent.LoadFinished);
                         break;
 
@@ -290,7 +349,10 @@ namespace BepInEx.SplashScreen
                         gameWindowTitle.StartsWith("Select BepInEx"))
                     {
                         // Need to refresh the process if the window handle is not yet valid or it will keep grabbing the old one
-                        _mainForm.TopMost = true;
+                        if (SplashScreenWindowType == "FixedWindow")
+                        {
+                            _mainForm.TopMost = true;
+                        }
                         gameProcess.Refresh();
                         continue;
                     }
@@ -300,7 +362,10 @@ namespace BepInEx.SplashScreen
                     if (gameWindowTitle.EndsWith(" Configuration"))
                     {
                         _mainForm.Visible = false;
-                        _mainForm.TopMost = true;
+                        if (SplashScreenWindowType == "FixedWindow")
+                        {
+                            _mainForm.TopMost = true;
+                        }
                         temporarilyHidden = true;
                         gameProcess.Refresh();
                         continue;
@@ -318,7 +383,12 @@ namespace BepInEx.SplashScreen
                     var foregroundWindow = NativeMethods.GetForegroundWindow();
                     // The main game window is not responding most of the time, which prevents it from being recognized as the foreground window
                     // To work around this, check if the currently focused window is the splash window, as it will most likely be the last focused window after user clicks on the game window
-                    _mainForm.TopMost = true;//TopMost = gameWindowHandle == foregroundWindow || NativeMethods.IsBorderless(gameWindowHandle);
+                    if (SplashScreenWindowType == "FixedWindow")
+                    {
+                        _mainForm.TopMost = true;
+                    }
+
+                    //TopMost = gameWindowHandle == foregroundWindow || NativeMethods.IsBorderless(gameWindowHandle);
 
                     // Just in case, don't want to mangle the splash
                     if (default(NativeMethods.RECT).Equals(rct))
@@ -334,11 +404,17 @@ namespace BepInEx.SplashScreen
                     if (_mainForm.FormBorderStyle != FormBorderStyle.None)
                     {
                         // At this point the form is snapped to the main game window so prevent user from trying to drag it
-                        _mainForm.FormBorderStyle = FormBorderStyle.None;
+                        _mainForm.Invoke((MethodInvoker)delegate
+                        {
+                            _mainForm.FormBorderStyle = FormBorderStyle.None;
+                            _mainForm.TopMost = false; //To make window not crash when setting ShowInTaskbar to false
+                            _mainForm.ShowInTaskbar = false;
+                            _mainForm.TopMost = true;
+                        });
+
+
                         //_mainForm.BackColor = Color.White;
                         _mainForm.PerformLayout();
-                        //Game window starts?
-                        _mainForm.ShowInTaskbar = false;
                     }
                 }
             }

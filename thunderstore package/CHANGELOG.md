@@ -1,7 +1,10 @@
-## Future Ideas
-- Lethal Level Loader support
+## v1.0.7 (Current version)
+- Added window type config (FakeGame/FixedWindow)
+- Added ExtraWaitTime config
+- Added WindowWidth config
+- Changed code that got the game icon for support with other games
 
-## v1.0.6 (Current version)
+## v1.0.6
 - If you close the loading window, the game will close too.
 - You can now minimize the window.
 - You can move the loading window now.

@@ -1,6 +1,6 @@
 {
     "name": "LoadingScreen",
-    "version_number": "1.0.6",
+    "version_number": "1.0.7",
     "website_url": "https://github.com/Bertogim/BepInEx.SplashScreen",
     "description": "A fork of BepInEx.SplashScreen, with a different UI, and some things fixed",
     "dependencies": [
