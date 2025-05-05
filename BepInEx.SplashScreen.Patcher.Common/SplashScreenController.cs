@@ -22,21 +22,21 @@ namespace BepInEx.SplashScreen
         {
             try
             {
-                var config = (ConfigFile)AccessTools.Property(typeof(ConfigFile), "CoreConfig").GetValue(null, null);
+                var config = new ConfigFile(Path.Combine(Paths.ConfigPath, "Bertogim.LoadingScreen.cfg"), true);
 
-                var isEnabled = config.Bind("SplashScreen", "Enabled", true, "Display a splash screen with information about game load progress on game start-up.").Value;
+                var isEnabled = config.Bind("LoadingScreen", "Enabled", true, "Display a loading window with information about game load progress on game start-up.").Value;
 //#if DEBUG
 //                const bool onlyNoConsoleDefault = false;
 //#else
 //                const bool onlyNoConsoleDefault = true;
 //#endif
-                //var consoleNotAllowed = config.Bind("SplashScreen", "OnlyNoConsole", onlyNoConsoleDefault, "Only display the splash screen if the logging console is turned off.").Value;
+                //var consoleNotAllowed = config.Bind("LoadingScreen", "OnlyNoConsole", onlyNoConsoleDefault, "Only display the splash screen if the logging console is turned off.").Value;
                 
-                var windowType = config.Bind("SplashScreen", "WindowType", "FakeGame", "FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears \nFixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less).").Value;
+                var windowType = config.Bind("LoadingScreen", "WindowType", "FakeGame", "FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears \nFixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less).").Value;
                 
-                var extraWaitTime = config.Bind("SplashScreen", "ExtraWaitTime", 1, "Seconds extra to mantain the loading screen starting when the game window shows up \nGood for big modpacks where the lethal company window stays blank loading for a few seconds").Value;
+                var extraWaitTime = config.Bind("LoadingScreen", "ExtraWaitTime", 1, "Seconds extra to mantain the loading screen starting when the game window shows up \nGood for big modpacks where the lethal company window stays blank loading for a few seconds").Value;
 
-                var windowWidth = config.Bind("SplashScreen", "WindowWidth", 640, "The window width in pixels (Gets affected by windows screen scale config) \nHeight is automatically calculated by the image aspect ratio.").Value;
+                var windowWidth = config.Bind("LoadingScreen", "WindowWidth", 640, "The window width in pixels (Gets affected by windows screen scale config) \nHeight is automatically calculated by the image aspect ratio.").Value;
                 
                 
                 if (!isEnabled)

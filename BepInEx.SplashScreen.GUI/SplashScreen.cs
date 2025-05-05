@@ -244,7 +244,7 @@ namespace BepInEx.SplashScreen
                 if (Directory.Exists(bepInExPath))
                 {
                     string configDir = Path.Combine(bepInExPath, "config");
-                    string configPath = Path.Combine(configDir, "BepInEx.cfg");
+                    string configPath = Path.Combine(configDir, "Bertogim.LoadingScreen.cfg");
 
                     if (File.Exists(configPath))
                     {
@@ -255,7 +255,7 @@ namespace BepInEx.SplashScreen
                         {
                             string trimmedLine = line.Trim();
 
-                            // Find the [SplashScreen] section
+                            // Find the [LoadingScreen] section
                             if (trimmedLine.StartsWith($"[{section}]"))
                             {
                                 inTargetSection = true;
@@ -289,8 +289,8 @@ namespace BepInEx.SplashScreen
 
             return defaultValue;
         }
-        public static string SplashScreenWindowType => GetBepInExConfigValue("SplashScreen", "WindowType", "FakeGame");
-        public static int SplashScreenWindowWidth => int.Parse(GetBepInExConfigValue("SplashScreen", "WindowWidth", "640"));
+        public static string SplashScreenWindowType => GetBepInExConfigValue("LoadingScreen", "WindowType", "FakeGame");
+        public static int SplashScreenWindowWidth => int.Parse(GetBepInExConfigValue("LoadingScreen", "WindowWidth", "640"));
 
         public void CenterWindow()
         {

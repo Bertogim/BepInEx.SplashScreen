@@ -17,18 +17,24 @@ This fork is only tested with Lethal Company but it should work with other games
 Feel free to open an issue at https://github.com/Bertogim/BepInEx.SplashScreen/issues
 
 Or you can open the discord thread: <br>
-[Open in app](discord://discordapp.com/channels/1168655651455639582/1364323192423977002) <br>
-[Open in browser](https://discordapp.com/channels/1168655651455639582/1364323192423977002)
+https://discordapp.com/channels/1168655651455639582/1364323192423977002 <br>
+To open the link on the discord app jusy replace the `https://` by `discord://`
+## Config
 
-## WindowType config
+Config can be seen in `Bertogim.LoadingScreen.cfg`.
+
+### Window type
 FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears 
 
 FixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less)
 
-Config can be seen in `BepInEx\config\BepInEx.cfg`
+### Window width
+The window width in pixels (Gets affected by windows screen scale config)
 
-You can also disable the console there (`[Logging.Console]` >
-`Enabled = false`), since the loading window will act as the game with `FakeGame`
+### More configs in the config file!
+
+You can disable the BepInEx console in `BepInEx\config\BepInEx.cfg` (`[Logging.Console]` >
+`Enabled = false`), since the loading window will act as the game with `FakeGame`.
 
 
 # BepInEx Loading Progress Splash Screen

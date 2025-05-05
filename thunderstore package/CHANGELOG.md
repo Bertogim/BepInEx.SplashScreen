@@ -1,4 +1,8 @@
-## v1.0.7 (Current version)
+## v1.0.8 (Current version)
+- Changed config file location from `BepInEx.cfg` (What the config file was when i forked this) to `Bertogim.LoadingScreen.cfg` to avoid bugs relating to the loading window and BepInEx reading the same file at the same time (You have to manually copy the config to the new file)
+- Changed timeout timer from 30s to 45s
+
+## v1.0.7
 - Added window type config (FakeGame/FixedWindow)
 - Added ExtraWaitTime config
 - Added WindowWidth config
