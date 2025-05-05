@@ -1,5 +1,5 @@
 ## v1.0.8 (Current version)
-- **FIXED IMPORTANT BUG**: Changed config file location from `BepInEx.cfg` (What the config file was when i forked this) to `Bertogim.LoadingScreen.cfg` to avoid bugs relating to the loading window and BepInEx reading the same file at the same time, making the game not load (You have to manually copy the config to the new file)
+- **FIXED IMPORTANT BUG**: Changed config file location from `BepInEx.cfg` (What the config file was when i forked this) to `Bertogim.LoadingScreen.cfg` to avoid bugs relating to the loading window and BepInEx reading the same file at the same time, making the game not load (The config is resetted to default in the new file)
 - Changed timeout timer from 30s to 45s
 
 ## v1.0.7
