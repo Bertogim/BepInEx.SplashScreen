@@ -3,6 +3,7 @@
 - Changed timeout timer from 30s to 45s
 
 ## v1.0.7
+⚠ Game might not start with this version
 - Added window type config (FakeGame/FixedWindow)
 - Added ExtraWaitTime config
 - Added WindowWidth config
