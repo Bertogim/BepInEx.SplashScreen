@@ -16,7 +16,7 @@ namespace BepInEx.SplashScreen
     {
         private static SplashScreen _mainForm;
 
-        private static readonly System.Timers.Timer _AliveTimer = new System.Timers.Timer(45000); //45 seconds
+        private static readonly System.Timers.Timer _AliveTimer = new System.Timers.Timer(120); //2 minutes
 
         /// <summary>
         /// The main entry point for the application.
@@ -118,7 +118,6 @@ namespace BepInEx.SplashScreen
             {
                 var gameProcess = (Process)processArg;
 
-                // Usar OpenStandardInput como antes
                 using (var inStream = Console.OpenStandardInput())
                 using (var inReader = new StreamReader(inStream))
                 {
@@ -247,7 +246,7 @@ namespace BepInEx.SplashScreen
         }
 
         public static string SplashScreenWindowType => GetBepInExConfigValue("LoadingScreen", "WindowType", "FakeGame");
-        public static int SplashScreenExtraWaitTime => int.Parse(GetBepInExConfigValue("LoadingScreen", "ExtraWaitTime", "5"));
+        public static int SplashScreenExtraWaitTime => int.Parse(GetBepInExConfigValue("LoadingScreen", "ExtraWaitTime", "0"));
 
         private static void ProcessInputMessage(string message)
         {

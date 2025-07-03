@@ -22,15 +22,6 @@ namespace BepInEx.SplashScreen
 
         private void InitializeComponent()
         {
-            int fixedWidth = 640;
-            float scale = (float)fixedWidth / 640;
-            int scaledHeight = (int)(360 * scale);
-
-            int labelHeight = 30;
-            int progressHeight = 10;
-            int totalHeight = scaledHeight + labelHeight + progressHeight;
-
-
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SplashScreen));
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.labelBot = new System.Windows.Forms.Label();
@@ -43,8 +34,6 @@ namespace BepInEx.SplashScreen
             // pictureBox1
             // 
             this.pictureBox1.Dock = DockStyle.None;
-            this.pictureBox1.Size = new Size(fixedWidth, scaledHeight);
-            this.pictureBox1.Location = new Point(0, 0);
             this.pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
@@ -59,16 +48,12 @@ namespace BepInEx.SplashScreen
             this.labelBot.Font = new Font("Segoe UI", 11, FontStyle.Bold);
             this.labelBot.Dock = DockStyle.Bottom;
             this.labelBot.TextAlign = ContentAlignment.MiddleCenter;
-            this.labelBot.Size = new Size(fixedWidth, labelHeight);
-            this.labelBot.Location = new Point(0, scaledHeight);
             this.labelBot.Text = "Initializing...";
 
             // 
             // progressBar1
             // 
             this.progressBar1.Dock = DockStyle.Bottom;
-            this.progressBar1.Size = new Size(fixedWidth, progressHeight);
-            this.progressBar1.Location = new Point(0, scaledHeight + labelHeight);
             this.progressBar1.Style = ProgressBarStyle.Continuous;
             this.progressBar1.ForeColor = Color.LimeGreen;
             this.progressBar1.Value = 0;
@@ -94,7 +79,7 @@ namespace BepInEx.SplashScreen
             // SplashScreen
             // 
             this.AutoScaleMode = AutoScaleMode.None;
-            this.ClientSize = new Size(fixedWidth, totalHeight); //(768, 472); //(512, 328);
+            //this.ClientSize = new Size(fixedWidth, totalHeight); //(768, 472); //(512, 328);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.labelBot);
             this.Controls.Add(this.pictureBox1);

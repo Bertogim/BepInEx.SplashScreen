@@ -307,41 +307,6 @@ namespace BepInEx.SplashScreen
             );
         }
 
-        public void SetIconImage(string imagePath)
-        {
-
-            // Load the image from file
-            Image img = Image.FromFile(imagePath);
-
-            // Fixed width for the form
-            int fixedWidth = SplashScreenWindowWidth;
-
-            // Calculate scaled height to maintain aspect ratio
-            float scale = (float)fixedWidth / img.Width;
-            int scaledHeight = (int)(img.Height * scale);
-
-            // Additional space for label and progress bar
-            int labelHeight = 30;
-            int progressHeight = 10;
-            int totalHeight = scaledHeight + labelHeight + progressHeight;
-
-            // Set form and picture box sizes
-            this.ClientSize = new Size(fixedWidth, totalHeight);
-            pictureBox1.Size = new Size(fixedWidth, scaledHeight);
-            pictureBox1.Location = new Point(0, 0);
-            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-            pictureBox1.Image = img;
-
-            // Adjust label and progress bar positions
-            labelBot.Size = new Size(fixedWidth, labelHeight);
-            labelBot.Location = new Point(0, scaledHeight);
-
-            progressBar1.Size = new Size(fixedWidth, progressHeight);
-            progressBar1.Location = new Point(0, scaledHeight + labelHeight);
-
-            CenterWindow();
-        }
-
         public static string BepInExRootPath
         {
             get
@@ -366,6 +331,29 @@ namespace BepInEx.SplashScreen
                 // Return empty string
                 return "";
             }
+        }
+
+
+
+        private void ConfigureLayout(int fixedWidth, int scaledHeight, PictureBoxSizeMode sizeMode)
+        {
+            int labelHeight = 30;
+            int progressHeight = 10;
+            int totalHeight = scaledHeight + labelHeight + progressHeight;
+
+            this.ClientSize = new Size(fixedWidth, totalHeight);
+
+            pictureBox1.Size = new Size(fixedWidth, scaledHeight);
+            pictureBox1.Location = new Point(0, 0);
+            pictureBox1.SizeMode = sizeMode;
+
+            labelBot.Size = new Size(fixedWidth, labelHeight);
+            labelBot.Location = new Point(0, scaledHeight);
+
+            progressBar1.Size = new Size(fixedWidth, progressHeight);
+            progressBar1.Location = new Point(0, scaledHeight + labelHeight);
+
+            CenterWindow();
         }
 
         public void SetIcon(Image fallbackIcon)
@@ -435,52 +423,42 @@ namespace BepInEx.SplashScreen
             }
         }
 
-        // Helper function to set the fallback icon
+        public void SetIconImage(string imagePath)
+        {
+            Image img = Image.FromFile(imagePath);
+
+            int fixedWidth = SplashScreenWindowWidth;
+
+            float scale = (float)fixedWidth / img.Width;
+            int scaledHeight = (int)(img.Height * scale);
+
+            ConfigureLayout(fixedWidth, scaledHeight, PictureBoxSizeMode.Zoom);
+
+            pictureBox1.Image = img;
+        }
+
         private void UseFallbackIcon(Image icon)
         {
             if (icon != null)
             {
-                // Fixed width for the form
                 int fixedWidth = SplashScreenWindowWidth;
 
-                // Calculate scaled height to maintain aspect ratio
+                // Hardcoded base resolution 640x360
                 float scale = (float)fixedWidth / 640;
                 int scaledHeight = (int)(360 * scale);
 
-                // Additional space for label and progress bar
-                int labelHeight = 30;
-                int progressHeight = 10;
-                int totalHeight = scaledHeight + labelHeight + progressHeight;
+                PictureBoxSizeMode mode = icon.Height < pictureBox1.Height ? PictureBoxSizeMode.CenterImage : PictureBoxSizeMode.Zoom;
 
-                // Set form and picture box sizes
-                this.ClientSize = new Size(fixedWidth, totalHeight);
+                ConfigureLayout(fixedWidth, scaledHeight, mode);
 
-                pictureBox1.SizeMode = icon.Height < pictureBox1.Height ? PictureBoxSizeMode.CenterImage : PictureBoxSizeMode.Zoom;
                 pictureBox1.Image = icon;
-
-                // Adjust label and progress bar positions
-                labelBot.Size = new Size(fixedWidth, labelHeight);
-                labelBot.Location = new Point(0, scaledHeight);
-
-                progressBar1.Size = new Size(fixedWidth, progressHeight);
-                progressBar1.Location = new Point(0, scaledHeight + labelHeight);
-
-                CenterWindow();
             }
         }
-
         public void SetPluginProgress(int percentDone)
         {
             _pluginPercentDone = Math.Min(100, Math.Max(Math.Max(0, percentDone), _pluginPercentDone));
             UpdateProgress();
         }
-
-        protected override void OnActivated(EventArgs e) // Is this even used?
-        {
-            base.OnActivated(e);
-            this.TopMost = true;
-        }
-
     }
 }
 

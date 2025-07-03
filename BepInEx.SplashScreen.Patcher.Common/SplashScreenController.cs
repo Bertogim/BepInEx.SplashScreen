@@ -38,6 +38,13 @@ namespace BepInEx.SplashScreen
 
                 var windowWidth = config.Bind("LoadingScreen", "WindowWidth", 640, "The window width in pixels (Gets affected by windows screen scale config) \nHeight is automatically calculated by the image aspect ratio.").Value;
                 
+                var textColor = config.Bind("LoadingScreen", "TextColor", "#FFFFFF", "Text color in hex format (e.g. #FFFFFF for white).").Value;
+
+                var textFont = config.Bind("LoadingScreen", "TextFont", "Segoe UI", "Font name used for the loading text (e.g. Arial, Segoe UI, Consolas). Must match an installed system font.\nFor a list of default Windows fonts, visit: https://learn.microsoft.com/en-us/typography/fonts/windows-core-fonts").Value;
+                
+                var backgroundColor = config.Bind("LoadingScreen", "BackgroundColor", "#000000", "Background color in hex format (e.g. #000000 for black).").Value;
+       
+
                 
                 if (!isEnabled)
                 {
