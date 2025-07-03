@@ -102,10 +102,6 @@ namespace BepInEx.SplashScreen
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.CheckedListBox checkedListBox1;
 
-        private bool dragging = false;
-        private Point dragCursorPoint;
-        private Point dragFormPoint;
-
         protected override bool ShowWithoutActivation => true;
 
     }

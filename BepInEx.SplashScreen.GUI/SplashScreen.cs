@@ -5,6 +5,18 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
 
+public static class ModifyProgressBarColor
+{
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
+    public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr w, IntPtr l);
+
+    // Extension method to set progress bar color state
+    public static void SetState(this ProgressBar pBar, int state)
+    {
+        SendMessage(pBar.Handle, 1040 /*PBM_SETSTATE*/, (IntPtr)state, IntPtr.Zero);
+    }
+}
+
 namespace BepInEx.SplashScreen
 {
     public partial class SplashScreen : Form
@@ -233,6 +245,32 @@ namespace BepInEx.SplashScreen
         {
             labelBot.Text = msg;
         }
+
+
+        class DwmApi
+        {
+            public enum DWMWINDOWATTRIBUTE : uint
+            {
+                DWMWA_CAPTION_COLOR = 35,
+                DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+            }
+
+            [DllImport("dwmapi.dll")]
+            public static extern int DwmSetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE attr, ref uint attrValue, int attrSize);
+
+            [DllImport("dwmapi.dll")]
+            public static extern int DwmSetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE attr, ref int attrValue, int attrSize);
+        }
+
+        // This works only on Windows 10 (build 1809) or later.
+        public void SetTitleBarColor(Color color)
+        {
+            uint colorRef = (uint)((color.R) | (color.G << 8) | (color.B << 16));
+            IntPtr hwnd = this.Handle;
+            DwmApi.DwmSetWindowAttribute(hwnd, DwmApi.DWMWINDOWATTRIBUTE.DWMWA_CAPTION_COLOR, ref colorRef, sizeof(uint));
+        }
+
+
         public static string GetBepInExConfigValue(string section, string key, string defaultValue = "")
         {
             string currentDir = Application.StartupPath;
@@ -337,6 +375,66 @@ namespace BepInEx.SplashScreen
 
         private void ConfigureLayout(int fixedWidth, int scaledHeight, PictureBoxSizeMode sizeMode)
         {
+            string textFontName = GetBepInExConfigValue("LoadingScreen", "TextFont", "Segoe UI");
+            string imageBackgroundColorHex = GetBepInExConfigValue("LoadingScreen", "ImageBackgroundColor", "#000000"); // Black
+            string textBackgroundColorHex = GetBepInExConfigValue("LoadingScreen", "TextBackgroundColor", "#595959"); // Gray
+            string textColorHex = GetBepInExConfigValue("LoadingScreen", "TextColor", "#FFFFFF"); // White
+            string titleBarColorHex = GetBepInExConfigValue("LoadingScreen", "TitleBarColor", "#FFFFFF"); // White
+            var progressStateStr = GetBepInExConfigValue("LoadingScreen", "ProgressBarState", "1");
+
+
+
+            Color imageBackgroundColor;
+            Color textBackgroundColor;
+            Color textColor;
+            Color titleBarColor;
+
+            try
+            {
+                imageBackgroundColor = ColorTranslator.FromHtml(imageBackgroundColorHex);
+            }
+            catch
+            {
+                imageBackgroundColor = Color.Black;
+            }
+
+            try
+            {
+                textBackgroundColor = ColorTranslator.FromHtml(textBackgroundColorHex);
+            }
+            catch
+            {
+                textBackgroundColor = Color.Black;
+            }
+
+            try
+            {
+                textColor = ColorTranslator.FromHtml(textColorHex);
+            }
+            catch
+            {
+                textColor = Color.White;
+            }
+
+            try
+            {
+                titleBarColor = ColorTranslator.FromHtml(titleBarColorHex);
+            }
+            catch
+            {
+                titleBarColor = Color.White;
+            }
+
+            if (titleBarColor != Color.White)
+            {
+                SetTitleBarColor(titleBarColor);
+            }
+
+            if (int.TryParse(progressStateStr, out int state) && state >= 1 && state <= 3)
+            {
+                progressBar1.SetState(state);
+            }
+
             int labelHeight = 30;
             int progressHeight = 10;
             int totalHeight = scaledHeight + labelHeight + progressHeight;
@@ -346,15 +444,31 @@ namespace BepInEx.SplashScreen
             pictureBox1.Size = new Size(fixedWidth, scaledHeight);
             pictureBox1.Location = new Point(0, 0);
             pictureBox1.SizeMode = sizeMode;
+            pictureBox1.BackColor = imageBackgroundColor;
 
             labelBot.Size = new Size(fixedWidth, labelHeight);
             labelBot.Location = new Point(0, scaledHeight);
+
+            try
+            {
+                labelBot.Font = new Font(textFontName, 11, FontStyle.Bold);
+            }
+            catch
+            {
+                labelBot.Font = new Font("Segoe UI", 11, FontStyle.Bold);
+            }
+
+            labelBot.BackColor = textBackgroundColor;
+            labelBot.ForeColor = textColor;
+            labelBot.TextAlign = ContentAlignment.MiddleCenter;
 
             progressBar1.Size = new Size(fixedWidth, progressHeight);
             progressBar1.Location = new Point(0, scaledHeight + labelHeight);
 
             CenterWindow();
         }
+
+
 
         public void SetIcon(Image fallbackIcon)
         {

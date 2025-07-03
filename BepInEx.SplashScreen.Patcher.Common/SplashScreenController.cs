@@ -40,12 +40,16 @@ namespace BepInEx.SplashScreen
                 
                 var textColor = config.Bind("LoadingScreen", "TextColor", "#FFFFFF", "Text color in hex format (e.g. #FFFFFF for white).").Value;
 
-                var textFont = config.Bind("LoadingScreen", "TextFont", "Segoe UI", "Font name used for the loading text (e.g. Arial, Segoe UI, Consolas). Must match an installed system font.\nFor a list of default Windows fonts, visit: https://learn.microsoft.com/en-us/typography/fonts/windows-core-fonts").Value;
-                
-                var backgroundColor = config.Bind("LoadingScreen", "BackgroundColor", "#000000", "Background color in hex format (e.g. #000000 for black).").Value;
-       
+                var textFont = config.Bind("LoadingScreen", "TextFont", "Segoe UI", "Font name used for the loading text (e.g. Arial, Segoe UI, Consolas). Must match an installed system font.\nFor a list of default Windows fonts, visit: https://learn.microsoft.com/en-us/typography/fonts/windows_10_font_list").Value;
 
-                
+                var textBackgroundColor = config.Bind("LoadingScreen", "TextBackgroundColor", "#595959", "Hex color for background behind text overlay (e.g. #595959 for gray)").Value;
+
+                var imageBackgroundColor = config.Bind("LoadingScreen", "ImageBackgroundColor", "#000000", "Hex color for the background (Custom images cover this)").Value;
+
+                var progressBarVisualState = config.Bind("LoadingScreen", "ProgressBarState", "1", "Progress bar visual style: 1 = Green, 2 = Red, 3 = Yellow (Windows limits the colors to these 3)").Value;
+
+                var titleBarColorHex = config.Bind("LoadingScreen", "TitleBarColor", "#FFFFFF", "Hex color for the window's title bar (e.g. #1E90FF for DodgerBlue). Leave as #FFFFFF for default behavior. Requires Windows 10 1809+").Value;
+
                 if (!isEnabled)
                 {
                     Logger.LogDebug("Not showing splash because the Enabled setting is off");
