@@ -135,7 +135,7 @@ namespace BepInEx.SplashScreen
                             continue;
                         }
 
-                        //Log(line, true); //For testing
+                        Log(line, true); //For testing
                         ProcessInputMessage(line);
                     }
                 }
@@ -245,8 +245,8 @@ namespace BepInEx.SplashScreen
             return defaultValue;
         }
 
-        public static string SplashScreenWindowType => GetBepInExConfigValue("LoadingScreen", "WindowType", "FakeGame");
-        public static int SplashScreenExtraWaitTime => int.Parse(GetBepInExConfigValue("LoadingScreen", "ExtraWaitTime", "0"));
+        public static string SplashScreenWindowType => GetBepInExConfigValue("2. Window", "WindowType", "FakeGame");
+        public static int SplashScreenExtraWaitTime => int.Parse(GetBepInExConfigValue("2. Window", "ExtraWaitTime", "0"));
 
         private static void ProcessInputMessage(string message)
         {

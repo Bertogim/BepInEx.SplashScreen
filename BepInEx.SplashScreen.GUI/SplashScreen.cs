@@ -4,66 +4,115 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
-
-public static class ModifyProgressBarColor
-{
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
-    public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr w, IntPtr l);
-
-    // Extension method to set progress bar color state
-    public static void SetState(this ProgressBar pBar, int state)
-    {
-        SendMessage(pBar.Handle, 1040 /*PBM_SETSTATE*/, (IntPtr)state, IntPtr.Zero);
-    }
-}
-
 public class CustomProgressBar : ProgressBar
 {
-    private Color _barColor = Color.LimeGreen;
-    private const int PROGRESS_HEIGHT = 10; // Fixed height for progress bar
+    // Progress bar colors
+    private Color _barColor;
+    private Color _backgroundColor;
 
-    public CustomProgressBar()
-    {
-        this.SetStyle(ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
-        this.Dock = DockStyle.Bottom;
-        this.Style = ProgressBarStyle.Continuous;
-        this.Height = PROGRESS_HEIGHT; // Set fixed height
-    }
+    // Border configuration
+    private Color _borderColor;
+    private int _borderSize;
+    private bool _drawBorder;
 
-    public CustomProgressBar(Color barColor) : this()
+    private const int PROGRESS_HEIGHT = 10;
+
+    public CustomProgressBar(Color barColor,
+                           Color backgroundColor,
+                           Color? borderColor = null,
+                           int borderSize = 1,
+                           bool drawBorder = true)
     {
         _barColor = barColor;
+        _backgroundColor = backgroundColor;
+        _borderColor = borderColor ?? Color.Gray;
+        _borderSize = Math.Max(0, borderSize); // Ensure non-negative
+        _drawBorder = drawBorder;
+
+        SetStyle(ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+        this.Height = PROGRESS_HEIGHT;
+        this.Dock = DockStyle.Bottom;
+        this.Style = ProgressBarStyle.Continuous;
+    }
+
+    // Public properties for runtime modifications
+    public Color BarColor
+    {
+        get => _barColor;
+        set { _barColor = value; Invalidate(); }
+    }
+
+    public Color BackgroundColor
+    {
+        get => _backgroundColor;
+        set { _backgroundColor = value; Invalidate(); }
+    }
+
+    public Color BorderColor
+    {
+        get => _borderColor;
+        set { _borderColor = value; Invalidate(); }
+    }
+
+    public int BorderSize
+    {
+        get => _borderSize;
+        set { _borderSize = Math.Max(0, value); Invalidate(); }
+    }
+
+    public bool DrawBorder
+    {
+        get => _drawBorder;
+        set { _drawBorder = value; Invalidate(); }
     }
 
     protected override void OnPaint(PaintEventArgs e)
     {
-        // Use entire client area
-        int width = this.Width;
-        int height = this.Height;
+        // Calculate rectangles accounting for border
+        Rectangle outerRect = new Rectangle(0, 0, Width, Height);
+        Rectangle innerRect = outerRect;
+
+        if (_drawBorder && _borderSize > 0)
+        {
+            innerRect.Inflate(-_borderSize, -_borderSize);
+        }
 
         // Draw background
-        Rectangle bgRect = new Rectangle(0, 0, width, height);
-        if (ProgressBarRenderer.IsSupported)
+        using (SolidBrush bgBrush = new SolidBrush(_backgroundColor))
         {
-            ProgressBarRenderer.DrawHorizontalBar(e.Graphics, bgRect);
+            e.Graphics.FillRectangle(bgBrush, innerRect);
         }
-        else
+
+        // Draw border if enabled
+        if (_drawBorder && _borderSize > 0)
         {
-            using (var bgBrush = new SolidBrush(this.BackColor))
+            using (Pen borderPen = new Pen(_borderColor, _borderSize))
             {
-                e.Graphics.FillRectangle(bgBrush, bgRect);
+                // Draw border rectangle (inside the control bounds)
+                Rectangle borderRect = new Rectangle(
+                    _borderSize / 2,
+                    _borderSize / 2,
+                    Width - _borderSize,
+                    Height - _borderSize
+                );
+                e.Graphics.DrawRectangle(borderPen, borderRect);
             }
-            ControlPaint.DrawBorder3D(e.Graphics, bgRect, Border3DStyle.Sunken);
         }
 
         // Draw progress
-        if (this.Value > 0)
+        if (Value > 0)
         {
-            int progressWidth = (int)((double)this.Value / this.Maximum * width);
+            int progressWidth = (int)((double)Value / Maximum * innerRect.Width);
             if (progressWidth > 0)
             {
-                Rectangle progressRect = new Rectangle(0, 0, progressWidth, height);
-                using (var progressBrush = new SolidBrush(_barColor))
+                Rectangle progressRect = new Rectangle(
+                    innerRect.Left,
+                    innerRect.Top,
+                    progressWidth,
+                    innerRect.Height
+                );
+
+                using (SolidBrush progressBrush = new SolidBrush(_barColor))
                 {
                     e.Graphics.FillRectangle(progressBrush, progressRect);
                 }
@@ -71,17 +120,9 @@ public class CustomProgressBar : ProgressBar
         }
     }
 
-    // Maintain fixed height regardless of docking
     protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
     {
         base.SetBoundsCore(x, y, width, PROGRESS_HEIGHT, specified);
-    }
-
-    // Prevent height changes at runtime
-    protected override void OnLayout(LayoutEventArgs levent)
-    {
-        base.OnLayout(levent);
-        this.Height = PROGRESS_HEIGHT;
     }
 }
 
@@ -395,8 +436,8 @@ namespace BepInEx.SplashScreen
 
             return defaultValue;
         }
-        public static string SplashScreenWindowType => GetBepInExConfigValue("LoadingScreen", "WindowType", "FakeGame");
-        public static int SplashScreenWindowWidth => int.Parse(GetBepInExConfigValue("LoadingScreen", "WindowWidth", "640"));
+        public static string SplashScreenWindowType => GetBepInExConfigValue("2. Window", "WindowType", "FakeGame");
+        public static int SplashScreenWindowWidth => int.Parse(GetBepInExConfigValue("2. Window", "WindowWidth", "640"));
 
         public void CenterWindow()
         {
@@ -444,21 +485,23 @@ namespace BepInEx.SplashScreen
         private void ConfigureLayout(int fixedWidth, int scaledHeight, PictureBoxSizeMode sizeMode)
         {
             // Window Settings
-            string windowType = GetBepInExConfigValue("Window", "WindowType", "FakeGame");
-            int windowWidth = int.Parse(GetBepInExConfigValue("Window", "WindowWidth", "640"));
-            int extraWaitTime = int.Parse(GetBepInExConfigValue("Window", "ExtraWaitTime", "1"));
-            string titleBarColorHex = GetBepInExConfigValue("Window", "TitleBarColor", "#FFFFFF");
-            string backgroundColorHex = GetBepInExConfigValue("Window", "BackgroundColor", "#000000");
+            //string windowType = GetBepInExConfigValue("2. Window", "WindowType", "FakeGame");
+            //int windowWidth = int.Parse(GetBepInExConfigValue("2. Window", "WindowWidth", "640"));
+            //int extraWaitTime = int.Parse(GetBepInExConfigValue("2. Window", "ExtraWaitTime", "1"));
+            string titleBarColorHex = GetBepInExConfigValue("2. Window", "TitleBarColor", "#FFFFFF");
+            string backgroundColorHex = GetBepInExConfigValue("2. Window", "BackgroundColor", "#000000");
 
             // Text Settings
-            string textColorHex = GetBepInExConfigValue("Text", "TextColor", "#FFFFFF");
-            string textFontName = GetBepInExConfigValue("Text", "TextFont", "Segoe UI");
-            string textBackgroundColorHex = GetBepInExConfigValue("Text", "TextBackgroundColor", "#595959");
+            string textColorHex = GetBepInExConfigValue("3. Text", "TextColor", "#FFFFFF");
+            string textFontName = GetBepInExConfigValue("3. Text", "TextFont", "Segoe UI");
+            string textBackgroundColorHex = GetBepInExConfigValue("3. Text", "TextBackgroundColor", "#595959");
 
             // Progress Bar Settings
-            bool useCustomProgressBar = bool.Parse(GetBepInExConfigValue("LoadingScreen", "UseCustomProgressBar", "true"));
-            string progressBarColorHex = GetBepInExConfigValue("ProgressBar", "ProgressBarColor", "1");
-            string progressBarBackgroundColorHex = GetBepInExConfigValue("ProgressBar", "ProgressBarBackgroundColor", "#FFFFFF");
+            bool useCustomProgressBar = bool.Parse(GetBepInExConfigValue("4. ProgressBar", "UseCustomProgressBar", "true"));
+            string progressBarColorHex = GetBepInExConfigValue("4. ProgressBar", "ProgressBarColor", "#34b233");
+            string progressBarBackgroundColorHex = GetBepInExConfigValue("4. ProgressBar", "ProgressBarBackgroundColor", "#FFFFFF");
+            int progressBarBorderSize = int.Parse(GetBepInExConfigValue("4. ProgressBar", "ProgressBarBorderSize", "0"));
+            string progressBarBorderColorHex = GetBepInExConfigValue("4. ProgressBar", "ProgressBarBorderColor", "#FFFFFF");
 
             // Convert colors
             Color backgroundColor = ParseColorHex(backgroundColorHex, Color.Black);
@@ -469,6 +512,7 @@ namespace BepInEx.SplashScreen
                 ? ParseColorHex(progressBarColorHex, Color.LimeGreen)
                 : Color.LimeGreen; // Default color if using numeric states
             Color progressBarBackgroundColor = ParseColorHex(progressBarBackgroundColorHex, Color.White);
+            Color progressBarBorderColor = ParseColorHex(progressBarBorderColorHex, Color.White);
 
             if (titleBarColor != Color.White)
             {
@@ -478,7 +522,12 @@ namespace BepInEx.SplashScreen
             if (useCustomProgressBar)
             {
                 // Replace with custom progress bar for hex colors
-                var newProgressBar = new CustomProgressBar(progressBarColor);
+                var newProgressBar = new CustomProgressBar(
+                progressBarColor,
+                progressBarBackgroundColor,
+                progressBarBorderColor,
+                progressBarBorderSize
+                );
 
                 // Copy properties from old progress bar
                 newProgressBar.Name = progressBar1.Name;
@@ -592,7 +641,7 @@ namespace BepInEx.SplashScreen
                 string pluginsPath = Path.Combine(BepInExRootPath, "plugins");
                 if (Directory.Exists(pluginsPath))
                 {
-                    string[] loadingScreenFolders = Directory.GetDirectories(pluginsPath, "LoadingScreen", SearchOption.AllDirectories);
+                    string[] loadingScreenFolders = Directory.GetDirectories(pluginsPath, "1. LoadingScreen", SearchOption.AllDirectories);
                     foreach (var folder in loadingScreenFolders)
                     {
                         string imagePath = Path.Combine(folder, "LoadingImage.png");

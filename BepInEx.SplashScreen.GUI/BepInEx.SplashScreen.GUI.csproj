@@ -96,7 +96,9 @@
   <ItemGroup>
     <Compile Include="IconManager.cs" />
     <Compile Include="LoadEvent.cs" />
-    <Compile Include="SplashScreen.cs" />
+    <Compile Include="SplashScreen.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="SplashScreen.Designer.cs">
       <DependentUpon>SplashScreen.cs</DependentUpon>
     </Compile>
