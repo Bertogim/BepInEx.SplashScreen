@@ -25,30 +25,27 @@ namespace BepInEx.SplashScreen
                 var config = new ConfigFile(Path.Combine(Paths.ConfigPath, "Bertogim.LoadingScreen.cfg"), true);
 
                 var isEnabled = config.Bind("LoadingScreen", "Enabled", true, "Display a loading window with information about game load progress on game start-up.").Value;
-//#if DEBUG
-//                const bool onlyNoConsoleDefault = false;
-//#else
-//                const bool onlyNoConsoleDefault = true;
-//#endif
+                //#if DEBUG
+                //                const bool onlyNoConsoleDefault = false;
+                //#else
+                //                const bool onlyNoConsoleDefault = true;
+                //#endif
                 //var consoleNotAllowed = config.Bind("LoadingScreen", "OnlyNoConsole", onlyNoConsoleDefault, "Only display the splash screen if the logging console is turned off.").Value;
-                
-                var windowType = config.Bind("LoadingScreen", "WindowType", "FakeGame", "FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears \nFixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less).").Value;
-                
-                var extraWaitTime = config.Bind("LoadingScreen", "ExtraWaitTime", 1, "Seconds extra to mantain the loading screen starting when the game window shows up \nGood for big modpacks where the lethal company window stays blank loading for a few seconds").Value;
 
-                var windowWidth = config.Bind("LoadingScreen", "WindowWidth", 640, "The window width in pixels (Gets affected by windows screen scale config) \nHeight is automatically calculated by the image aspect ratio.").Value;
-                
-                var textColor = config.Bind("LoadingScreen", "TextColor", "#FFFFFF", "Text color in hex format (e.g. #FFFFFF for white).").Value;
+                var windowType = config.Bind("Window", "WindowType", "FakeGame", new ConfigDescription("FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears\nFixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less).", new AcceptableValueList<string>(new string[] { "FakeGame", "FixedWindow" }), new object[0])).Value;
+                var windowWidth = config.Bind("Window", "WindowWidth", 640, "The window width in pixels (Gets affected by windows screen scale config) \nHeight is automatically calculated by the image aspect ratio.").Value;
+                var extraWaitTime = config.Bind("Window", "ExtraWaitTime", 1, new ConfigDescription("Seconds extra to maintain the loading screen starting when the game window shows up\nGood for big modpacks where the lethal company window stays blank loading for a few seconds", new AcceptableValueRange<int>(0, 60), new object[0])).Value;
+                var titleBarColorHex = config.Bind("Window", "TitleBarColor", "#FFFFFF", "Hex color for the window's title bar (e.g. #1E90FF for DodgerBlue). Leave as #FFFFFF for default behavior. Requires Windows 10 build 1809+").Value;
+                var BackgroundColor = config.Bind("Window", "BackgroundColor", "#000000", "Hex color for the background (Custom images cover this)").Value;
 
-                var textFont = config.Bind("LoadingScreen", "TextFont", "Segoe UI", "Font name used for the loading text (e.g. Arial, Segoe UI, Consolas). Must match an installed system font.\nFor a list of default Windows fonts, visit: https://learn.microsoft.com/en-us/typography/fonts/windows_10_font_list").Value;
+                var textColor = config.Bind("Text", "TextColor", "#FFFFFF", "Text color in hex format (e.g. #FFFFFF for white).").Value;
+                var textFont = config.Bind("Text", "TextFont", "Segoe UI", "Font name used for the loading text (e.g. Arial, Segoe UI, Consolas). Must match an installed system font.\nFor a list of default Windows fonts, visit: https://learn.microsoft.com/en-us/typography/fonts/windows_10_font_list").Value;
+                var textBackgroundColor = config.Bind("Text", "TextBackgroundColor", "#595959", "Hex color for background behind the text (e.g. #595959 for gray)").Value;
 
-                var textBackgroundColor = config.Bind("LoadingScreen", "TextBackgroundColor", "#595959", "Hex color for background behind text overlay (e.g. #595959 for gray)").Value;
+                var useCustomProgressBar = config.Bind("LoadingScreen", "UseCustomProgressBar", true, "Whether to use a customizable progress bar (allows changing colors) instead of the Windows native one").Value;
+                var progressBarColor = config.Bind("ProgressBar", "ProgressBarColor", "1", "Progress bar color, use a hex color (e.g. #34b233 for Wageningen Green) \n Or you can use the Windows defaut three colors: 1 = Green, 2 = Red, 3 = Yellow").Value;
+                var progressBarBackgroundColor = config.Bind("ProgressBar", "ProgressBarBackgroundColor", "#FFFFFF", "Progress bar background color, use a hex color (e.g. #FFFFFF for white)").Value;
 
-                var imageBackgroundColor = config.Bind("LoadingScreen", "ImageBackgroundColor", "#000000", "Hex color for the background (Custom images cover this)").Value;
-
-                var progressBarVisualState = config.Bind("LoadingScreen", "ProgressBarState", "1", "Progress bar visual style: 1 = Green, 2 = Red, 3 = Yellow (Windows limits the colors to these 3)").Value;
-
-                var titleBarColorHex = config.Bind("LoadingScreen", "TitleBarColor", "#FFFFFF", "Hex color for the window's title bar (e.g. #1E90FF for DodgerBlue). Leave as #FFFFFF for default behavior. Requires Windows 10 1809+").Value;
 
                 if (!isEnabled)
                 {

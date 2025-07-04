@@ -17,6 +17,74 @@ public static class ModifyProgressBarColor
     }
 }
 
+public class CustomProgressBar : ProgressBar
+{
+    private Color _barColor = Color.LimeGreen;
+    private const int PROGRESS_HEIGHT = 10; // Fixed height for progress bar
+
+    public CustomProgressBar()
+    {
+        this.SetStyle(ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+        this.Dock = DockStyle.Bottom;
+        this.Style = ProgressBarStyle.Continuous;
+        this.Height = PROGRESS_HEIGHT; // Set fixed height
+    }
+
+    public CustomProgressBar(Color barColor) : this()
+    {
+        _barColor = barColor;
+    }
+
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        // Use entire client area
+        int width = this.Width;
+        int height = this.Height;
+
+        // Draw background
+        Rectangle bgRect = new Rectangle(0, 0, width, height);
+        if (ProgressBarRenderer.IsSupported)
+        {
+            ProgressBarRenderer.DrawHorizontalBar(e.Graphics, bgRect);
+        }
+        else
+        {
+            using (var bgBrush = new SolidBrush(this.BackColor))
+            {
+                e.Graphics.FillRectangle(bgBrush, bgRect);
+            }
+            ControlPaint.DrawBorder3D(e.Graphics, bgRect, Border3DStyle.Sunken);
+        }
+
+        // Draw progress
+        if (this.Value > 0)
+        {
+            int progressWidth = (int)((double)this.Value / this.Maximum * width);
+            if (progressWidth > 0)
+            {
+                Rectangle progressRect = new Rectangle(0, 0, progressWidth, height);
+                using (var progressBrush = new SolidBrush(_barColor))
+                {
+                    e.Graphics.FillRectangle(progressBrush, progressRect);
+                }
+            }
+        }
+    }
+
+    // Maintain fixed height regardless of docking
+    protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
+    {
+        base.SetBoundsCore(x, y, width, PROGRESS_HEIGHT, specified);
+    }
+
+    // Prevent height changes at runtime
+    protected override void OnLayout(LayoutEventArgs levent)
+    {
+        base.OnLayout(levent);
+        this.Height = PROGRESS_HEIGHT;
+    }
+}
+
 namespace BepInEx.SplashScreen
 {
     public partial class SplashScreen : Form
@@ -375,65 +443,65 @@ namespace BepInEx.SplashScreen
 
         private void ConfigureLayout(int fixedWidth, int scaledHeight, PictureBoxSizeMode sizeMode)
         {
-            string textFontName = GetBepInExConfigValue("LoadingScreen", "TextFont", "Segoe UI");
-            string imageBackgroundColorHex = GetBepInExConfigValue("LoadingScreen", "ImageBackgroundColor", "#000000"); // Black
-            string textBackgroundColorHex = GetBepInExConfigValue("LoadingScreen", "TextBackgroundColor", "#595959"); // Gray
-            string textColorHex = GetBepInExConfigValue("LoadingScreen", "TextColor", "#FFFFFF"); // White
-            string titleBarColorHex = GetBepInExConfigValue("LoadingScreen", "TitleBarColor", "#FFFFFF"); // White
-            var progressStateStr = GetBepInExConfigValue("LoadingScreen", "ProgressBarState", "1");
+            // Window Settings
+            string windowType = GetBepInExConfigValue("Window", "WindowType", "FakeGame");
+            int windowWidth = int.Parse(GetBepInExConfigValue("Window", "WindowWidth", "640"));
+            int extraWaitTime = int.Parse(GetBepInExConfigValue("Window", "ExtraWaitTime", "1"));
+            string titleBarColorHex = GetBepInExConfigValue("Window", "TitleBarColor", "#FFFFFF");
+            string backgroundColorHex = GetBepInExConfigValue("Window", "BackgroundColor", "#000000");
 
+            // Text Settings
+            string textColorHex = GetBepInExConfigValue("Text", "TextColor", "#FFFFFF");
+            string textFontName = GetBepInExConfigValue("Text", "TextFont", "Segoe UI");
+            string textBackgroundColorHex = GetBepInExConfigValue("Text", "TextBackgroundColor", "#595959");
 
+            // Progress Bar Settings
+            bool useCustomProgressBar = bool.Parse(GetBepInExConfigValue("LoadingScreen", "UseCustomProgressBar", "true"));
+            string progressBarColorHex = GetBepInExConfigValue("ProgressBar", "ProgressBarColor", "1");
+            string progressBarBackgroundColorHex = GetBepInExConfigValue("ProgressBar", "ProgressBarBackgroundColor", "#FFFFFF");
 
-            Color imageBackgroundColor;
-            Color textBackgroundColor;
-            Color textColor;
-            Color titleBarColor;
-
-            try
-            {
-                imageBackgroundColor = ColorTranslator.FromHtml(imageBackgroundColorHex);
-            }
-            catch
-            {
-                imageBackgroundColor = Color.Black;
-            }
-
-            try
-            {
-                textBackgroundColor = ColorTranslator.FromHtml(textBackgroundColorHex);
-            }
-            catch
-            {
-                textBackgroundColor = Color.Black;
-            }
-
-            try
-            {
-                textColor = ColorTranslator.FromHtml(textColorHex);
-            }
-            catch
-            {
-                textColor = Color.White;
-            }
-
-            try
-            {
-                titleBarColor = ColorTranslator.FromHtml(titleBarColorHex);
-            }
-            catch
-            {
-                titleBarColor = Color.White;
-            }
+            // Convert colors
+            Color backgroundColor = ParseColorHex(backgroundColorHex, Color.Black);
+            Color textBackgroundColor = ParseColorHex(textBackgroundColorHex, Color.FromArgb(89, 89, 89));
+            Color textColor = ParseColorHex(textColorHex, Color.White);
+            Color titleBarColor = ParseColorHex(titleBarColorHex, Color.White);
+            Color progressBarColor = progressBarColorHex.StartsWith("#")
+                ? ParseColorHex(progressBarColorHex, Color.LimeGreen)
+                : Color.LimeGreen; // Default color if using numeric states
+            Color progressBarBackgroundColor = ParseColorHex(progressBarBackgroundColorHex, Color.White);
 
             if (titleBarColor != Color.White)
             {
                 SetTitleBarColor(titleBarColor);
             }
 
-            if (int.TryParse(progressStateStr, out int state) && state >= 1 && state <= 3)
+            if (useCustomProgressBar)
             {
-                progressBar1.SetState(state);
+                // Replace with custom progress bar for hex colors
+                var newProgressBar = new CustomProgressBar(progressBarColor);
+
+                // Copy properties from old progress bar
+                newProgressBar.Name = progressBar1.Name;
+                newProgressBar.Value = progressBar1.Value;
+                newProgressBar.Minimum = progressBar1.Minimum;
+                newProgressBar.Maximum = progressBar1.Maximum;
+
+                // Get position in controls collection
+                int index = Controls.IndexOf(progressBar1);
+
+                // Remove and dispose old progress bar
+                Controls.Remove(progressBar1);
+                progressBar1.Dispose();
+
+                // Create and add new progress bar
+                progressBar1 = newProgressBar;
+                Controls.Add(progressBar1);
+                Controls.SetChildIndex(progressBar1, index);
             }
+
+            Controls.Add(pictureBox1);
+            Controls.Add(progressBar1);
+            Controls.Add(labelBot);
 
             int labelHeight = 30;
             int progressHeight = 10;
@@ -444,7 +512,7 @@ namespace BepInEx.SplashScreen
             pictureBox1.Size = new Size(fixedWidth, scaledHeight);
             pictureBox1.Location = new Point(0, 0);
             pictureBox1.SizeMode = sizeMode;
-            pictureBox1.BackColor = imageBackgroundColor;
+            pictureBox1.BackColor = backgroundColor;
 
             labelBot.Size = new Size(fixedWidth, labelHeight);
             labelBot.Location = new Point(0, scaledHeight);
@@ -468,6 +536,17 @@ namespace BepInEx.SplashScreen
             CenterWindow();
         }
 
+        private Color ParseColorHex(string hexColor, Color defaultColor)
+        {
+            try
+            {
+                return ColorTranslator.FromHtml(hexColor);
+            }
+            catch
+            {
+                return defaultColor;
+            }
+        }
 
 
         public void SetIcon(Image fallbackIcon)
