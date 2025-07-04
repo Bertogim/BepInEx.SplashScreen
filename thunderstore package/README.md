@@ -20,17 +20,40 @@ Or you can open the discord thread: <br>
 https://discordapp.com/channels/1168655651455639582/1364323192423977002 <br>
 To open the link on the discord app jusy replace the `https://` by `discord://`
 You can also show your loading screen on the discord thread :D
-## Config
+## Configuration Summary
 
 Config can be seen in `Bertogim.LoadingScreen.cfg`.
 
-### Window type
-FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears 
 
-FixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less)
+1. **LoadingScreen**  
+   Enables or disables the display of a loading window that shows game load progress during startup.  
+   - Type: Boolean  
+   - Default: true  
 
-### Window width
-The window width in pixels (Gets affected by windows screen scale config)
+2. **Window**  
+   Configures the loading screen window behavior and appearance:  
+   - `WindowType`: Chooses between a fake game window or a fixed, non-movable loading screen.  
+   - `WindowWidth`: Sets the width of the window in pixels. Height is auto-calculated based on image aspect ratio.  
+   - `ExtraWaitTime`: Extra seconds to keep the loading screen visible after the game window appears, useful for large modpacks.  
+   - `TitleBarColor`: Hex color for the window’s title bar (requires Windows 10 build 1809+).  
+   - `BackgroundColor`: Hex color for the window background (overridden if using custom images).
+
+3. **Text**  
+   Defines the appearance of the loading text:  
+   - `TextColor`: Hex color for the loading text.  
+   - `TextFont`: Font name for the loading text, must be an installed system font.  
+   - `TextBackgroundColor`: Hex color for the background behind the text.  
+
+4. **ProgressBar**  
+   Controls the appearance and behavior of the progress bar:  
+   - `UseCustomProgressBar`: Enables a customizable progress bar instead of the native Windows one.  
+   - `ProgressBarColor`: Hex color of the progress bar fill.  
+   - `ProgressBarBackgroundColor`: Hex color for the progress bar background.  
+   - `ProgressBarBorderSize`: Thickness of the progress bar border in pixels (0-4).  
+   - `ProgressBarBorderColor`: Hex color for the progress bar border.  
+   - `ProgressBarSmoothness`: Smoothness of the loading bar animation (0-100).  
+   - `ProgressBarCurve`: Animation curve for smooth interpolation of progress bar value (e.g., EaseOut, Linear, Bounce).  
+
 
 ### More configs in the config file!
 

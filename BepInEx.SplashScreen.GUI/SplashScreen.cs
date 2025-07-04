@@ -57,7 +57,7 @@ public class CustomProgressBar : ProgressBar
         get => _smoothness;
         set
         {
-            _smoothness = Math.Max(0, Math.Min(100, value));
+            _smoothness = value;
         }
     }
 
@@ -447,10 +447,14 @@ namespace BepInEx.SplashScreen
 
                     checkedListBox1.SetItemChecked(1, true);
                     int newValue = checkedListBox1.CheckedItems.Count * 10 + _pluginPercentDone;
-                    newProgressBar.Smoothness = SplashScreenExtraWaitTime * 100;
+                    newProgressBar.Smoothness = SplashScreenExtraWaitTime * 10;
+                    _closedByScript = true; //In case someone does ALT F4 to the loading screen, not close the game
+
+                    System.Threading.Thread.Sleep(1000);
+
                     progressBar1.Value = newValue;
 
-                    System.Threading.Thread.Sleep(SplashScreenExtraWaitTime * 1000);
+                    System.Threading.Thread.Sleep(SplashScreenExtraWaitTime * 1000 - 1000);
 
                     //Environment.Exit(0);
                     SafeClose();

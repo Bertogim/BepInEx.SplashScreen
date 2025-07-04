@@ -1,4 +1,6 @@
 ## v1.1.0 (Current version)
+- Changed timeout timer from 45s to 5min
+#### Added a lot of customizations:
 - Added config TitleBarColor
 - Added config BackgroundColor
 - Added config TextColor
@@ -10,6 +12,7 @@
 - Added config ProgressBarBorderSize
 - Added config ProgressBarBorderColor
 - Added config ProgressBarSmoothness
+- Added config ProgressBarCurve
 
 
 ## v1.0.8
