@@ -16,7 +16,7 @@ namespace BepInEx.SplashScreen
     {
         private static SplashScreen _mainForm;
 
-        private static readonly System.Timers.Timer _AliveTimer = new System.Timers.Timer(120*1000); //2 minutes (seconds*ms)
+        private static readonly System.Timers.Timer _AliveTimer = new System.Timers.Timer(300 * 1000); //5 minutes (seconds*ms)
 
         /// <summary>
         /// The main entry point for the application.
@@ -135,7 +135,7 @@ namespace BepInEx.SplashScreen
                             continue;
                         }
 
-                        Log(line, true); //For testing
+                        //Log(line, true); //For testing
                         ProcessInputMessage(line);
                     }
                 }
@@ -246,7 +246,6 @@ namespace BepInEx.SplashScreen
         }
 
         public static string SplashScreenWindowType => GetBepInExConfigValue("2. Window", "WindowType", "FakeGame");
-        public static int SplashScreenExtraWaitTime => int.Parse(GetBepInExConfigValue("2. Window", "ExtraWaitTime", "0"));
 
         private static void ProcessInputMessage(string message)
         {
@@ -271,7 +270,7 @@ namespace BepInEx.SplashScreen
                         break;
                     case "Chainloader startup complete": //bep5 and bep6
                         RunEventsUpTo(LoadEvent.ChainloaderFinish);
-                        Thread.Sleep(SplashScreenExtraWaitTime * 1000);
+
                         RunEventsUpTo(LoadEvent.LoadFinished);
                         break;
 

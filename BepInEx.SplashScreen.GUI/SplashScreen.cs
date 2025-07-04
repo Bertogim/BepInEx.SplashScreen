@@ -3,92 +3,168 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+
 using System.IO;
+
+
+public static class MathUtils
+{
+    public static float Clamp(float value, float min, float max)
+    {
+        return value < min ? min : value > max ? max : value;
+    }
+
+    public static int Clamp(int value, int min, int max)
+    {
+        return value < min ? min : value > max ? max : value;
+    }
+
+    public static float Lerp(float a, float b, float t)
+    {
+        return a + (b - a) * MathUtils.Clamp(t, 0, 1);
+    }
+}
+
+
+
+
+public enum ProgressBarCurve
+{
+    Linear,
+    EaseIn,
+    EaseOut,
+    EaseInOut,
+    SmootherStep,
+    Exponential,
+    Elastic,
+    Bounce,
+    BackIn,
+    BackOut,
+    Spring
+}
+
+
+
 public class CustomProgressBar : ProgressBar
 {
-    // Progress bar colors
     private Color _barColor;
     private Color _backgroundColor;
-
-    // Border configuration
     private Color _borderColor;
     private int _borderSize;
-    private bool _drawBorder;
+    private int _smoothness;
+    public int Smoothness
+    {
+        get => _smoothness;
+        set
+        {
+            _smoothness = Math.Max(0, Math.Min(100, value));
+        }
+    }
+
+    private ProgressBarCurve _curve;
+
+    private ProgressBar _sourceProgressBar;
+    private double _currentDisplayedValue;
+    private double _velocity = 0;
+
+    private Timer _animationTimer;
+
+    private double _animationProgress = 1.0; // Valor de 0 a 1 para interpolar
+    private double _lastTarget;
 
     private const int PROGRESS_HEIGHT = 10;
 
-    public CustomProgressBar(Color barColor,
-                           Color backgroundColor,
-                           Color? borderColor = null,
-                           int borderSize = 1,
-                           bool drawBorder = true)
+    public CustomProgressBar(ProgressBar source,
+                             Color barColor,
+                             Color backgroundColor,
+                             Color borderColor,
+                             int borderSize,
+                             int smoothness,
+                             ProgressBarCurve curve = ProgressBarCurve.SmootherStep)
     {
+        _sourceProgressBar = source;
         _barColor = barColor;
         _backgroundColor = backgroundColor;
-        _borderColor = borderColor ?? Color.Gray;
-        _borderSize = Math.Max(0, borderSize); // Ensure non-negative
-        _drawBorder = drawBorder;
+        _borderColor = borderColor;
+        _borderSize = Math.Max(0, borderSize);
+        _smoothness = Math.Max(0, Math.Min(100, smoothness));
+        _curve = curve;
+
+        _currentDisplayedValue = _sourceProgressBar.Value;
+        _lastTarget = _currentDisplayedValue;
 
         SetStyle(ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
         this.Height = PROGRESS_HEIGHT;
         this.Dock = DockStyle.Bottom;
         this.Style = ProgressBarStyle.Continuous;
+
+        _animationTimer = new Timer { Interval = 16 }; // ~60 FPS
+        _animationTimer.Tick += (s, e) => AnimateProgress();
+        _animationTimer.Start();
     }
 
-    // Public properties for runtime modifications
-    public Color BarColor
+    private double _animationStartValue;
+    private double _animationTargetValue;
+    private bool _isAnimating = false;
+
+    private void AnimateProgress()
     {
-        get => _barColor;
-        set { _barColor = value; Invalidate(); }
+        int target = MathUtils.Clamp(_sourceProgressBar.Value, _sourceProgressBar.Minimum, _sourceProgressBar.Maximum);
+
+        if (_smoothness == 0)
+        {
+            _currentDisplayedValue = target;
+            _isAnimating = false;
+        }
+        else
+        {
+            if (!_isAnimating || Math.Abs(target - _animationTargetValue) > 0.01)
+            {
+                // Nuevo objetivo: reiniciamos la animación
+                _animationStartValue = _currentDisplayedValue;
+                _animationTargetValue = target;
+                _animationProgress = 0.0;
+                _isAnimating = true;
+            }
+
+            if (_isAnimating)
+            {
+                double duration = 1.0 + (_smoothness / 100.0) * 4.0; // Duración entre 1 y 5 segundos, ajustar si quieres
+                double deltaTime = _animationTimer.Interval / 1000.0;
+
+                _animationProgress += deltaTime / duration;
+                if (_animationProgress >= 1.0)
+                {
+                    _animationProgress = 1.0;
+                    _isAnimating = false;
+                }
+
+                double curvedT = ApplyCurveToT(_animationProgress, _curve);
+
+                // Interpolamos entre inicio y objetivo según curva
+                _currentDisplayedValue = Lerp(_animationStartValue, _animationTargetValue, curvedT);
+            }
+        }
+
+        Invalidate();
     }
 
-    public Color BackgroundColor
-    {
-        get => _backgroundColor;
-        set { _backgroundColor = value; Invalidate(); }
-    }
-
-    public Color BorderColor
-    {
-        get => _borderColor;
-        set { _borderColor = value; Invalidate(); }
-    }
-
-    public int BorderSize
-    {
-        get => _borderSize;
-        set { _borderSize = Math.Max(0, value); Invalidate(); }
-    }
-
-    public bool DrawBorder
-    {
-        get => _drawBorder;
-        set { _drawBorder = value; Invalidate(); }
-    }
 
     protected override void OnPaint(PaintEventArgs e)
     {
-        // Calculate rectangles accounting for border
         Rectangle outerRect = new Rectangle(0, 0, Width, Height);
         Rectangle innerRect = outerRect;
 
-        if (_drawBorder && _borderSize > 0)
-        {
+        if (_borderSize > 0)
             innerRect.Inflate(-_borderSize, -_borderSize);
-        }
 
-        // Draw background
         using (SolidBrush bgBrush = new SolidBrush(_backgroundColor))
-        {
             e.Graphics.FillRectangle(bgBrush, innerRect);
-        }
 
-        // Draw border if enabled
-        if (_drawBorder && _borderSize > 0)
+        if (_borderSize > 0)
         {
             using (Pen borderPen = new Pen(_borderColor, _borderSize))
             {
-                // Draw border rectangle (inside the control bounds)
                 Rectangle borderRect = new Rectangle(
                     _borderSize / 2,
                     _borderSize / 2,
@@ -99,10 +175,11 @@ public class CustomProgressBar : ProgressBar
             }
         }
 
-        // Draw progress
-        if (Value > 0)
+        if (_currentDisplayedValue > 0)
         {
-            int progressWidth = (int)((double)Value / Maximum * innerRect.Width);
+            double percent = (_currentDisplayedValue - Minimum) / (double)(Maximum - Minimum);
+            int progressWidth = (int)(innerRect.Width * percent);
+
             if (progressWidth > 0)
             {
                 Rectangle progressRect = new Rectangle(
@@ -113,9 +190,7 @@ public class CustomProgressBar : ProgressBar
                 );
 
                 using (SolidBrush progressBrush = new SolidBrush(_barColor))
-                {
                     e.Graphics.FillRectangle(progressBrush, progressRect);
-                }
             }
         }
     }
@@ -124,7 +199,67 @@ public class CustomProgressBar : ProgressBar
     {
         base.SetBoundsCore(x, y, width, PROGRESS_HEIGHT, specified);
     }
+
+    private double ApplyCurveToT(double t, ProgressBarCurve curve)
+    {
+        t = Math.Max(0, Math.Min(1, t));
+
+        switch (curve)
+        {
+            case ProgressBarCurve.EaseIn:
+                return t * t;
+
+            case ProgressBarCurve.EaseOut:
+                return 1 - (1 - t) * (1 - t);
+
+            case ProgressBarCurve.EaseInOut:
+                return t < 0.5 ? 2 * t * t : 1 - Math.Pow(-2 * t + 2, 2) / 2;
+
+            case ProgressBarCurve.SmootherStep:
+                return t * t * t * (t * (t * 6 - 15) + 10);
+
+            case ProgressBarCurve.Exponential:
+                return t == 0 ? 0 : Math.Pow(2, 10 * (t - 1));
+
+            case ProgressBarCurve.Elastic:
+                if (t == 0 || t == 1) return t;
+                double c4 = (2 * Math.PI) / 3;
+                return -Math.Pow(2, 10 * t - 10) * Math.Sin((t * 10 - 10.75) * c4);
+
+            case ProgressBarCurve.Bounce:
+                if (t < 1 / 2.75) return 7.5625 * t * t;
+                else if (t < 2 / 2.75) return 7.5625 * (t -= 1.5 / 2.75) * t + 0.75;
+                else if (t < 2.5 / 2.75) return 7.5625 * (t -= 2.25 / 2.75) * t + 0.9375;
+                else return 7.5625 * (t -= 2.625 / 2.75) * t + 0.984375;
+
+            case ProgressBarCurve.BackIn:
+                {
+                    double s = 1.70158;
+                    return t * t * ((s + 1) * t - s);
+                }
+
+            case ProgressBarCurve.BackOut:
+                {
+                    double s = 1.70158;
+                    t -= 1;
+                    return t * t * ((s + 1) * t + s) + 1;
+                }
+
+            case ProgressBarCurve.Spring:
+                return Math.Sin(t * Math.PI * (0.2 + 2.5 * t * t * t)) * Math.Pow(1 - t, 2.2) + t;
+
+            case ProgressBarCurve.Linear:
+            default:
+                return t;
+        }
+    }
+
+    private double Lerp(double a, double b, double t)
+    {
+        return a + (b - a) * MathUtils.Clamp((float)t, 0f, 1f);
+    }
 }
+
 
 namespace BepInEx.SplashScreen
 {
@@ -253,20 +388,19 @@ namespace BepInEx.SplashScreen
             SetCurrentProcessExplicitAppUserModelID(AppUserModelID);
 
             progressBar1.Minimum = 0;
-            progressBar1.Maximum = 100 + checkedListBox1.Items.Count * 15;
+            progressBar1.Maximum = 100 + checkedListBox1.Items.Count * 10;
             progressBar1.Value = 0;
-
-            AppendToItem(0, WorkingStr);
 
             // Force window to appear in taskbar
             this.ShowInTaskbar = true;
             int currentStyle = GetWindowLong(this.Handle, GWL_EXSTYLE).ToInt32();
             SetWindowLong(this.Handle, GWL_EXSTYLE, currentStyle | WS_EX_APPWINDOW);
         }
+        public static int SplashScreenExtraWaitTime => int.Parse(GetBepInExConfigValue("2. Window", "ExtraWaitTime", "0"));
 
         private void UpdateProgress()
         {
-            int newValue = checkedListBox1.CheckedItems.Count * 15 + _pluginPercentDone;
+            int newValue = checkedListBox1.CheckedItems.Count * 10 + _pluginPercentDone;
             progressBar1.Value = newValue;
 
             // Update taskbar progress
@@ -286,29 +420,21 @@ namespace BepInEx.SplashScreen
             switch (e)
             {
                 case LoadEvent.PreloaderStart:
-                    checkedListBox1.SetItemChecked(0, true);
-                    AppendToItem(0, DoneStr);
-                    AppendToItem(1, WorkingStr);
                     SetStatusMain("BepInEx patchers are being applied...");
                     break;
 
                 case LoadEvent.PreloaderFinish:
-                    checkedListBox1.SetItemChecked(1, true);
-                    AppendToItem(1, DoneStr);
+                    checkedListBox1.SetItemChecked(0, true);
                     SetStatusMain("Finished applying patchers.");
                     SetStatusDetail("Plugins should start loading soon.");//\nIn case loading is stuck, check your entry point.");
                     break;
 
                 case LoadEvent.ChainloaderStart:
-                    AppendToItem(2, WorkingStr);
                     SetStatusMain("BepInEx plugins are being loaded...");
                     break;
 
                 case LoadEvent.ChainloaderFinish:
                     _pluginPercentDone = 100;
-                    checkedListBox1.SetItemChecked(2, true);
-                    AppendToItem(2, DoneStr);
-                    AppendToItem(3, WorkingStr);
                     SetStatusMain("Finished loading plugins.");
                     SetStatusDetail("Waiting for the game to start...");//\nSome plugins might need more time to finish loading.");
                                                                         //Game window starts?
@@ -317,8 +443,15 @@ namespace BepInEx.SplashScreen
                     break;
 
                 case LoadEvent.LoadFinished:
-                    //AppendToItem(3, "Done");
-                    //checkedListBox1.SetItemCheckState(3, CheckState.Checked);
+
+
+                    checkedListBox1.SetItemChecked(1, true);
+                    int newValue = checkedListBox1.CheckedItems.Count * 10 + _pluginPercentDone;
+                    newProgressBar.Smoothness = SplashScreenExtraWaitTime * 100;
+                    progressBar1.Value = newValue;
+
+                    System.Threading.Thread.Sleep(SplashScreenExtraWaitTime * 1000);
+
                     //Environment.Exit(0);
                     SafeClose();
                     return;
@@ -335,12 +468,6 @@ namespace BepInEx.SplashScreen
         {
             _closedByScript = true;
             this.Close();
-        }
-
-        private void AppendToItem(int index, string str)
-        {
-            var current = checkedListBox1.Items[index].ToString();
-            checkedListBox1.Items[index] = current + str;
         }
 
         public void SetStatusMain(string msg)
@@ -481,6 +608,7 @@ namespace BepInEx.SplashScreen
         }
 
 
+        private CustomProgressBar newProgressBar;
 
         private void ConfigureLayout(int fixedWidth, int scaledHeight, PictureBoxSizeMode sizeMode)
         {
@@ -502,6 +630,8 @@ namespace BepInEx.SplashScreen
             string progressBarBackgroundColorHex = GetBepInExConfigValue("4. ProgressBar", "ProgressBarBackgroundColor", "#FFFFFF");
             int progressBarBorderSize = int.Parse(GetBepInExConfigValue("4. ProgressBar", "ProgressBarBorderSize", "0"));
             string progressBarBorderColorHex = GetBepInExConfigValue("4. ProgressBar", "ProgressBarBorderColor", "#FFFFFF");
+            int progressBarSmoothness = int.Parse(GetBepInExConfigValue("4. ProgressBar", "ProgressBarSmoothness", "5"));
+            string progressBarCurve = GetBepInExConfigValue("4. ProgressBar", "ProgressBarCurve", "Linear");
 
             // Convert colors
             Color backgroundColor = ParseColorHex(backgroundColorHex, Color.Black);
@@ -513,44 +643,53 @@ namespace BepInEx.SplashScreen
                 : Color.LimeGreen; // Default color if using numeric states
             Color progressBarBackgroundColor = ParseColorHex(progressBarBackgroundColorHex, Color.White);
             Color progressBarBorderColor = ParseColorHex(progressBarBorderColorHex, Color.White);
+            ProgressBarCurve progressBarCurveEnum;
 
             if (titleBarColor != Color.White)
             {
                 SetTitleBarColor(titleBarColor);
             }
 
+
+            try
+            {
+                progressBarCurveEnum = (ProgressBarCurve)Enum.Parse(typeof(ProgressBarCurve), progressBarCurve, true);
+            }
+            catch
+            {
+                progressBarCurveEnum = ProgressBarCurve.Linear;
+            }
+
             if (useCustomProgressBar)
             {
                 // Replace with custom progress bar for hex colors
-                var newProgressBar = new CustomProgressBar(
+                newProgressBar = new CustomProgressBar(
+                progressBar1,
                 progressBarColor,
                 progressBarBackgroundColor,
                 progressBarBorderColor,
-                progressBarBorderSize
+                progressBarBorderSize,
+                progressBarSmoothness,
+                progressBarCurveEnum
                 );
 
                 // Copy properties from old progress bar
-                newProgressBar.Name = progressBar1.Name;
-                newProgressBar.Value = progressBar1.Value;
+                newProgressBar.Name = "newProgressBar";
                 newProgressBar.Minimum = progressBar1.Minimum;
                 newProgressBar.Maximum = progressBar1.Maximum;
 
-                // Get position in controls collection
-                int index = Controls.IndexOf(progressBar1);
+                // Create and add new progress bar
+                Controls.Add(pictureBox1);
+                Controls.Add(newProgressBar);
+                Controls.Add(labelBot);
 
                 // Remove and dispose old progress bar
-                Controls.Remove(progressBar1);
-                progressBar1.Dispose();
+                progressBar1.Visible = false;
+                //Controls.Remove(progressBar1);
+                //progressBar1.Dispose();
+                //progressBar1 = newProgressBar;
 
-                // Create and add new progress bar
-                progressBar1 = newProgressBar;
-                Controls.Add(progressBar1);
-                Controls.SetChildIndex(progressBar1, index);
             }
-
-            Controls.Add(pictureBox1);
-            Controls.Add(progressBar1);
-            Controls.Add(labelBot);
 
             int labelHeight = 30;
             int progressHeight = 10;

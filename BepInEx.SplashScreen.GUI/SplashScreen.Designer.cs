@@ -66,10 +66,8 @@ namespace BepInEx.SplashScreen
             this.checkedListBox1.CausesValidation = false;
             this.checkedListBox1.FormattingEnabled = true;
             this.checkedListBox1.Items.AddRange(new object[] {
-    "Initialize environment and BepInEx",
-    "Load and apply patchers",
-    "Load and apply plugins",
-    "Start the game"});
+            "Load and apply plugins",
+            "Start the game"});
             this.checkedListBox1.SelectionMode = System.Windows.Forms.SelectionMode.None;
             this.checkedListBox1.ThreeDCheckBoxes = true;
             this.checkedListBox1.UseTabStops = false;

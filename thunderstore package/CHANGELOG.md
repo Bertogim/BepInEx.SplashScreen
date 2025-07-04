@@ -1,9 +1,23 @@
-## v1.0.8 (Current version)
+## v1.1.0 (Current version)
+- Added config TitleBarColor
+- Added config BackgroundColor
+- Added config TextColor
+- Added config TextFont
+- Added config TextBackgroundColor
+- Added config UseCustomProgressBar
+- Added config ProgressBarColor
+- Added config ProgressBarBackgroundColor
+- Added config ProgressBarBorderSize
+- Added config ProgressBarBorderColor
+- Added config ProgressBarSmoothness
+
+
+## v1.0.8
 - **FIXED IMPORTANT BUG**: Changed config file location from `BepInEx.cfg` (What the config file was when i forked this) to `Bertogim.LoadingScreen.cfg` to avoid bugs relating to the loading window and BepInEx reading the same file at the same time, making the game not load (The config is resetted to default in the new file)
 - Changed timeout timer from 30s to 45s
 
 ## v1.0.7
-⚠ Game might not start with this version
+⚠ DO NOT USE THIS VERSION: Game might not start with this version
 - Added window type config (FakeGame/FixedWindow)
 - Added ExtraWaitTime config
 - Added WindowWidth config

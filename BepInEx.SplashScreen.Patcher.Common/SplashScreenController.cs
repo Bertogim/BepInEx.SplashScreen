@@ -47,7 +47,33 @@ namespace BepInEx.SplashScreen
                 var progressBarBackgroundColor = config.Bind("4. ProgressBar", "ProgressBarBackgroundColor", "#FFFFFF", "Progress bar background color, use a hex color (e.g. #FFFFFF for white)").Value;
                 var progressBarBorderSize = config.Bind("4. ProgressBar", "ProgressBarBorderSize", 0, new ConfigDescription("Border thickness in pixels (0-4)", new AcceptableValueRange<int>(0, 4), new object[0])).Value;
                 var progressBarBorderColorHex = config.Bind("4. ProgressBar", "ProgressBarBorderColor", "#FFFFFF", "Border color in hex format (e.g. #FF0000)").Value;
-
+                var progressBarBorderSmoothness = config.Bind("4. ProgressBar", "ProgressBarSmoothness", 25, new ConfigDescription("Loading bar smoothness when changing (0-100)", new AcceptableValueRange<int>(0, 100), new object[0])).Value;
+                var progressBarCurveName = config.Bind(
+                                    "4. ProgressBar",
+                                    "ProgressBarCurve",
+                                    "EaseOut",
+                                    new ConfigDescription(
+                                        "Animation curve used to interpolate the loading bar value smoothly over time.\n" +
+                                        "Available curves:\n" +
+                                        "- Linear: Constant speed\n" +
+                                        "- EaseIn: Starts slow, speeds up\n" +
+                                        "- EaseOut: Starts fast, slows down\n" +
+                                        "- EaseInOut: Slow start and end\n" +
+                                        "- SmootherStep: Smoothest transition (default)\n" +
+                                        "- Exponential: Very slow start, accelerates\n" +
+                                        "- Elastic: Overshoots and bounces into place\n" +
+                                        "- Bounce: Bounces like a ball at the end\n" +
+                                        "- BackIn: Starts by going backward, then forward\n" +
+                                        "- BackOut: Overshoots slightly and comes back\n" +
+                                        "- Spring: Oscillates like a spring",
+                                        new AcceptableValueList<string>(new string[]
+                                        {
+                                        "Linear", "EaseIn", "EaseOut", "EaseInOut",
+                                        "SmootherStep", "Exponential", "Elastic",
+                                        "Bounce", "BackIn", "BackOut", "Spring"
+                                        })
+                                    )
+                                ).Value;
                 if (!isEnabled)
                 {
                     Logger.LogDebug("Not showing splash because the Enabled setting is off");

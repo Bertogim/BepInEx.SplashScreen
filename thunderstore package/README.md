@@ -13,12 +13,13 @@ BepInEx.SplashScreen.GUI.exe is renamed to LoadingScreen.GUI.exe to try to fix d
 
 This fork is only tested with Lethal Company but it should work with other games
 
-## Got issues or feedback?
+## Got issues, feedback?
 Feel free to open an issue at https://github.com/Bertogim/BepInEx.SplashScreen/issues
 
 Or you can open the discord thread: <br>
 https://discordapp.com/channels/1168655651455639582/1364323192423977002 <br>
 To open the link on the discord app jusy replace the `https://` by `discord://`
+You can also show your loading screen on the discord thread :D
 ## Config
 
 Config can be seen in `Bertogim.LoadingScreen.cfg`.
