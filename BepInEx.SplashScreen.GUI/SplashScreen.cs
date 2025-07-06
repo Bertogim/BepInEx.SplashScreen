@@ -447,7 +447,7 @@ namespace BepInEx.SplashScreen
 
                     checkedListBox1.SetItemChecked(1, true);
                     int newValue = checkedListBox1.CheckedItems.Count * 10 + _pluginPercentDone;
-                    newProgressBar.Smoothness = SplashScreenExtraWaitTime * 10;
+                    newProgressBar.Smoothness = (SplashScreenExtraWaitTime - 2) * 10; //2 seconds less because it works (Needs to be clamped)
                     _closedByScript = true; //In case someone does ALT F4 to the loading screen, not close the game
 
                     System.Threading.Thread.Sleep(1000);
@@ -784,7 +784,7 @@ namespace BepInEx.SplashScreen
                 string pluginsPath = Path.Combine(BepInExRootPath, "plugins");
                 if (Directory.Exists(pluginsPath))
                 {
-                    string[] loadingScreenFolders = Directory.GetDirectories(pluginsPath, "1. LoadingScreen", SearchOption.AllDirectories);
+                    string[] loadingScreenFolders = Directory.GetDirectories(pluginsPath, "LoadingScreen", SearchOption.AllDirectories);
                     foreach (var folder in loadingScreenFolders)
                     {
                         string imagePath = Path.Combine(folder, "LoadingImage.png");
