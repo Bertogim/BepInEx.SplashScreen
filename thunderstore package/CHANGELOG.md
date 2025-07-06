@@ -1,4 +1,9 @@
-## v1.1.0 (Current version)
+## v1.1.1 (Current version)
+- Fixed a issue where the folder with the loading image had to be named `1. LoadingScreen`
+- Fixed the game icon being resized, covering most of the window
+- Improved the progress bar with the `Extra wait time` setting on
+
+## v1.1.0
 - Changed timeout timer from 45s to 5min
 #### Added a lot of customizations:
 - Added config TitleBarColor

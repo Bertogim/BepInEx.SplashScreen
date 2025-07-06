@@ -120,7 +120,6 @@ public class CustomProgressBar : ProgressBar
         {
             if (!_isAnimating || Math.Abs(target - _animationTargetValue) > 0.01)
             {
-                // Nuevo objetivo: reiniciamos la animación
                 _animationStartValue = _currentDisplayedValue;
                 _animationTargetValue = target;
                 _animationProgress = 0.0;
@@ -129,7 +128,7 @@ public class CustomProgressBar : ProgressBar
 
             if (_isAnimating)
             {
-                double duration = 1.0 + (_smoothness / 100.0) * 4.0; // Duración entre 1 y 5 segundos, ajustar si quieres
+                double duration = 1.0 + (_smoothness / 100.0) * 4.0;
                 double deltaTime = _animationTimer.Interval / 1000.0;
 
                 _animationProgress += deltaTime / duration;
@@ -141,7 +140,6 @@ public class CustomProgressBar : ProgressBar
 
                 double curvedT = ApplyCurveToT(_animationProgress, _curve);
 
-                // Interpolamos entre inicio y objetivo según curva
                 _currentDisplayedValue = Lerp(_animationStartValue, _animationTargetValue, curvedT);
             }
         }
@@ -447,14 +445,30 @@ namespace BepInEx.SplashScreen
 
                     checkedListBox1.SetItemChecked(1, true);
                     int newValue = checkedListBox1.CheckedItems.Count * 10 + _pluginPercentDone;
-                    newProgressBar.Smoothness = (SplashScreenExtraWaitTime - 2) * 10; //2 seconds less because it works (Needs to be clamped)
-                    _closedByScript = true; //In case someone does ALT F4 to the loading screen, not close the game
 
-                    System.Threading.Thread.Sleep(1000);
+
+                    double minWait = 5;
+                    double maxWait = 60;
+                    double maxAddition = 25;
+
+                    double addition = 0;
+
+                    if (SplashScreenExtraWaitTime > minWait)
+                    {
+                        // Interpolación lineal del aumento
+                        double t = (SplashScreenExtraWaitTime - minWait) / (maxWait - minWait);
+                        t = Math.Min(t, 1); // Clamp a 1 para evitar superar los 10 segundos
+                        addition = t * maxAddition;
+                    }
+
+                    newProgressBar.Smoothness = (int)((SplashScreenExtraWaitTime + addition) * 10); _closedByScript = true; //In case someone does ALT F4 to the loading screen, not close the game
+
+
+                    System.Threading.Thread.Sleep(10);
 
                     progressBar1.Value = newValue;
 
-                    System.Threading.Thread.Sleep(SplashScreenExtraWaitTime * 1000 - 1000);
+                    System.Threading.Thread.Sleep(SplashScreenExtraWaitTime * 1000 - 10);
 
                     //Environment.Exit(0);
                     SafeClose();
@@ -832,9 +846,9 @@ namespace BepInEx.SplashScreen
                 float scale = (float)fixedWidth / 640;
                 int scaledHeight = (int)(360 * scale);
 
-                PictureBoxSizeMode mode = icon.Height < pictureBox1.Height ? PictureBoxSizeMode.CenterImage : PictureBoxSizeMode.Zoom;
+                //PictureBoxSizeMode mode = icon.Height < pictureBox1.Height ? PictureBoxSizeMode.CenterImage : PictureBoxSizeMode.Zoom;
 
-                ConfigureLayout(fixedWidth, scaledHeight, mode);
+                ConfigureLayout(fixedWidth, scaledHeight, PictureBoxSizeMode.CenterImage);
 
                 pictureBox1.Image = icon;
             }

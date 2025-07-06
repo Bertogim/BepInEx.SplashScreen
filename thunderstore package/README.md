@@ -26,9 +26,7 @@ Config can be seen in `Bertogim.LoadingScreen.cfg`.
 
 
 1. **LoadingScreen**  
-   Enables or disables the display of a loading window that shows game load progress during startup.  
-   - Type: Boolean  
-   - Default: true  
+   - `Enabled`: Enables or disables the display of the loading window.
 
 2. **Window**  
    Configures the loading screen window behavior and appearance:  

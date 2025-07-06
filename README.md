@@ -18,7 +18,7 @@ Feel free to open an issue at https://github.com/Bertogim/BepInEx.SplashScreen/i
 
 Or you can open the discord thread: <br>
 https://discordapp.com/channels/1168655651455639582/1364323192423977002 <br>
-To open the link on the discord app jusy replace the `https://` by `discord://`
+To open the link on the discord app jusy replace the `https://` by `discord://` <br>
 You can also show your loading screen on the discord thread :D
 ## Configuration Summary
 
@@ -26,9 +26,7 @@ Config can be seen in `Bertogim.LoadingScreen.cfg`.
 
 
 1. **LoadingScreen**  
-   Enables or disables the display of a loading window that shows game load progress during startup.  
-   - Type: Boolean  
-   - Default: true  
+   - `Enabled`: Enables or disables the display of the loading window.
 
 2. **Window**  
    Configures the loading screen window behavior and appearance:  
