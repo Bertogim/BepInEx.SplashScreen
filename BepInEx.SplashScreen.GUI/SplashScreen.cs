@@ -351,7 +351,7 @@ namespace BepInEx.SplashScreen
         private int _pluginPercentDone;
         private readonly Action<string, bool> _logAction;
         private readonly Process _gameProcess;
-        private bool _closedByScript = false;
+        public bool _closedByScript = false;
 
 
         public SplashScreen(Action<string, bool> logAction, Process gameProcess)
@@ -461,7 +461,8 @@ namespace BepInEx.SplashScreen
                         addition = t * maxAddition;
                     }
 
-                    newProgressBar.Smoothness = (int)((SplashScreenExtraWaitTime + addition) * 10); _closedByScript = true; //In case someone does ALT F4 to the loading screen, not close the game
+                    newProgressBar.Smoothness = (int)((SplashScreenExtraWaitTime + addition) * 10);
+                    _closedByScript = true; //In case someone does ALT F4 to the loading screen, not close the game
 
 
                     System.Threading.Thread.Sleep(10);
@@ -656,9 +657,7 @@ namespace BepInEx.SplashScreen
             Color textBackgroundColor = ParseColorHex(textBackgroundColorHex, Color.FromArgb(89, 89, 89));
             Color textColor = ParseColorHex(textColorHex, Color.White);
             Color titleBarColor = ParseColorHex(titleBarColorHex, Color.White);
-            Color progressBarColor = progressBarColorHex.StartsWith("#")
-                ? ParseColorHex(progressBarColorHex, Color.LimeGreen)
-                : Color.LimeGreen; // Default color if using numeric states
+            Color progressBarColor = ParseColorHex(progressBarColorHex, Color.LimeGreen);
             Color progressBarBackgroundColor = ParseColorHex(progressBarBackgroundColorHex, Color.White);
             Color progressBarBorderColor = ParseColorHex(progressBarBorderColorHex, Color.White);
             ProgressBarCurve progressBarCurveEnum;
@@ -746,6 +745,9 @@ namespace BepInEx.SplashScreen
         {
             try
             {
+                if (!hexColor.StartsWith("#"))
+                    hexColor = "#" + hexColor;
+
                 return ColorTranslator.FromHtml(hexColor);
             }
             catch

@@ -1,4 +1,10 @@
-## v1.1.1 (Current version)
+## v1.1.2 (Current version)
+- Added gale mod manager config support for colors.
+- Fixed skipped plugins making the loading progress skip to a certain percentage.
+- Improved the plugin timeout timer
+- Added a debug option to see which plugins take the most time loading
+
+## v1.1.1
 - Fixed a issue where the folder with the loading image had to be named `1. LoadingScreen`
 - Fixed the game icon being resized, covering most of the window
 - Improved the progress bar with the `Extra wait time` setting on

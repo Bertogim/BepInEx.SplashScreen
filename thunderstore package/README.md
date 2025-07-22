@@ -52,8 +52,11 @@ Config can be seen in `Bertogim.LoadingScreen.cfg`.
    - `ProgressBarSmoothness`: Smoothness of the loading bar animation (0-100).  
    - `ProgressBarCurve`: Animation curve for smooth interpolation of progress bar value (e.g., EaseOut, Linear, Bounce).  
 
+5. **Other**  
+   Other miscellaneous settings:  
+   - `GenerateStartupPluginLoadTimeInfo`: Generate a summary of how many time did each plugin take to load.  
 
-### More configs in the config file!
+</br>
 
 You can disable the BepInEx console in `BepInEx\config\BepInEx.cfg` (`[Logging.Console]` >
 `Enabled = false`), since the loading window will act as the game with `FakeGame`.

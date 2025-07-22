@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using System.Collections.Generic;
+
 
 [assembly: AssemblyTitle("BepInEx.SplashScreen.GUI")]
 
@@ -16,7 +18,31 @@ namespace BepInEx.SplashScreen
     {
         private static SplashScreen _mainForm;
 
-        private static readonly System.Timers.Timer _AliveTimer = new System.Timers.Timer(300 * 1000); //5 minutes (seconds*ms)
+        //Stable timer
+        private static readonly System.Threading.Timer _aliveTimerThreading =
+            new System.Threading.Timer(OnAliveTimerElapsed, null, Timeout.Infinite, Timeout.Infinite);
+
+        // Call this instead of Stop/Start:
+        private static void ResetAliveTimer()
+        {
+            _aliveTimerThreading.Change(300_000, Timeout.Infinite); // 5 min
+        }
+
+        // If log messages stop coming, preloader/chainloader has crashed or is stuck
+        private static void OnAliveTimerElapsed(object state)
+        {
+            try
+            {
+                Log("Stopped receiving log messages from the game, assuming preloader/chainloader has crashed or is stuck", true);
+            }
+            catch (Exception e)
+            {
+                Debug.Fail(e.ToString());
+            }
+
+            _mainForm._closedByScript = true;
+            Environment.Exit(3);
+        }
 
         /// <summary>
         /// The main entry point for the application.
@@ -64,22 +90,7 @@ namespace BepInEx.SplashScreen
 
                     BeginSnapPositionToGameWindow(gameProcess);
 
-                    // If log messages stop coming, preloader/chainloader has crashed or is stuck
-                    _AliveTimer.AutoReset = false;
-                    _AliveTimer.Elapsed += (_, __) =>
-                    {
-                        try
-                        {
-                            Log("Stopped receiving log messages from the game, assuming preloader/chainloader has crashed or is stuck", true);
-                        }
-                        catch (Exception e)
-                        {
-                            // ¯\_(ツ)_/¯
-                            Debug.Fail(e.ToString());
-                        }
-                        Environment.Exit(3);
-                    };
-                    _AliveTimer.Start();
+                    ResetAliveTimer();
                 }
                 catch (Exception e)
                 {
@@ -124,8 +135,7 @@ namespace BepInEx.SplashScreen
                     while (inStream.CanRead && !gameProcess.HasExited)
                     {
                         // Still receiving log messages, so preloader/chainloader is still alive and loading
-                        _AliveTimer.Stop();
-                        _AliveTimer.Start();
+                        ResetAliveTimer();
 
                         var line = inReader.ReadLine();
 
@@ -247,6 +257,119 @@ namespace BepInEx.SplashScreen
 
         public static string SplashScreenWindowType => GetBepInExConfigValue("2. Window", "WindowType", "FakeGame");
 
+        private static readonly Dictionary<string, TimeSpan> _pluginLoadTimes = new Dictionary<string, TimeSpan>();
+        private static Stopwatch _pluginLoadStopwatch = new Stopwatch();
+
+        private static string _lastPluginName = string.Empty;
+
+        public static string DebugGeneratePluginLoadTimeInfo => GetBepInExConfigValue("5. Other", "GenerateStartupPluginLoadTimeInfo", "false");
+
+
+        private static string GenerateHtmlReport(Dictionary<string, TimeSpan> loadTimes)
+        {
+            string rows = string.Join("\n", loadTimes
+                .OrderByDescending((KeyValuePair<string, TimeSpan> kv) => kv.Value)
+                .Select((KeyValuePair<string, TimeSpan> kv) => string.Format("<tr><td>{0}</td><td>{1:F3} s</td></tr>", kv.Key, kv.Value.TotalSeconds))
+                .ToArray());
+
+            return $@"
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset=""UTF-8"">
+                <title>Plugin Load Times</title>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        background-color: #f0f2f5;
+                        padding: 20px;
+                    }}
+                    table {{
+                        width: 100%;
+                        border-collapse: collapse;
+                        background-color: white;
+                    }}
+                    th, td {{
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 1px solid #ddd;
+                    }}
+                    th {{
+                        background-color: #4CAF50;
+                        color: white;
+                    }}
+                    tr {{
+                        border-bottom: 2px solid;
+                        border-color: #b2b2b2
+                    }}
+                    body > table > tbody > tr:nth-child(1) {{
+                        border: none;
+                    }}
+                    tr:hover {{
+                        background-color: #d3d3d3;
+                    }}
+                </style>
+            </head>
+            <body>
+                <h2>Plugin Load Times</h2>
+                <small>Load times can vary from startup to startup</small>
+                <table>
+                    <tr>
+                        <th>Plugin</th>
+                        <th>Load Time</th>
+                    </tr>
+                    {rows}
+                </table>
+            </body>
+            </html>";
+        }
+        private static void PluginLoaded(string message)
+        {
+            bool debugEnabled = string.Equals(DebugGeneratePluginLoadTimeInfo, "true", StringComparison.OrdinalIgnoreCase);
+            if (!debugEnabled) return;
+
+            if (!string.IsNullOrEmpty(_lastPluginName))
+            {
+                _pluginLoadStopwatch.Stop();
+                _pluginLoadTimes[_lastPluginName] = _pluginLoadStopwatch.Elapsed;
+            }
+
+            _lastPluginName = message.Substring("Loading ".Length).Trim();
+            _pluginLoadStopwatch.Stop();
+            _pluginLoadStopwatch.Reset();
+            _pluginLoadStopwatch.Start();
+        }
+
+        private static void PluginsFinishedLoading()
+        {
+            bool debugEnabled = string.Equals(DebugGeneratePluginLoadTimeInfo, "true", StringComparison.OrdinalIgnoreCase);
+            if (!debugEnabled) return;
+
+            if (!string.IsNullOrEmpty(_lastPluginName))
+            {
+                _pluginLoadStopwatch.Stop();
+                _pluginLoadTimes[_lastPluginName] = _pluginLoadStopwatch.Elapsed;
+            }
+
+            string debugPath = Path.Combine(Application.StartupPath, "Debug");
+            Directory.CreateDirectory(debugPath);
+
+            string txtPath = Path.Combine(debugPath, "PluginLoadTimes.txt");
+            string htmlPath = Path.Combine(debugPath, "PluginLoadTimes.html");
+
+            var lines = _pluginLoadTimes.Select(kv => $"{kv.Key}: {kv.Value.TotalMilliseconds:F2} ms").ToList();
+            File.WriteAllLines(txtPath, lines.ToArray());
+
+            string html = GenerateHtmlReport(_pluginLoadTimes);
+            File.WriteAllText(htmlPath, html);
+        }
+
+
+
+
+
+
+
         private static void ProcessInputMessage(string message)
         {
             try
@@ -270,8 +393,10 @@ namespace BepInEx.SplashScreen
                         break;
                     case "Chainloader startup complete": //bep5 and bep6
                         RunEventsUpTo(LoadEvent.ChainloaderFinish);
+                        PluginsFinishedLoading();
 
                         RunEventsUpTo(LoadEvent.LoadFinished);
+
                         break;
 
                     default:
@@ -294,13 +419,16 @@ namespace BepInEx.SplashScreen
 
                             _pluginProcessedCount++;
                             _mainForm.SetPluginProgress((int)Math.Round(100f * (_pluginProcessedCount / (float)_pluginCount)));
+
+                            PluginLoaded(message);
                         }
                         else if (message.StartsWith("Skipping ", StringComparison.Ordinal)) //bep5 and bep6?
                         {
-                            RunEventsUpTo(LoadEvent.ChainloaderStart);
+                            // Skipped plugins are not counted in the total plugin count, so we should not touch anything (At least in bep5)
+                            //RunEventsUpTo(LoadEvent.ChainloaderStart);
 
-                            _pluginProcessedCount++;
-                            _mainForm.SetPluginProgress((int)Math.Round(100f * (_pluginProcessedCount / (float)_pluginCount)));
+                            //_pluginProcessedCount++;
+                            //_mainForm.SetPluginProgress((int)Math.Round(100f * (_pluginProcessedCount / (float)_pluginCount)));
                         }
                         else if (message.EndsWith(" plugins to load", StringComparison.Ordinal)) //bep5 and bep6
                         {

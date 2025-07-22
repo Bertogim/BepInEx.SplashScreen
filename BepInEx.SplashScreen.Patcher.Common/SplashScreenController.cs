@@ -22,32 +22,60 @@ namespace BepInEx.SplashScreen
         {
             try
             {
+
+                //
+                // FUNCTIONS
+                //
+                string RemoveHashtag(string value)
+                {
+                    if (!string.IsNullOrEmpty(value) && value.StartsWith("#"))
+                    {
+                        return value.Substring(1);
+                    }
+                    return value;
+                }
+
+                void CheckValue(BepInEx.Configuration.ConfigEntry<string> setting)
+                {
+                    string changedValue = RemoveHashtag(setting.Value);
+                    if (changedValue != setting.Value)
+                    {
+                        setting.Value = changedValue;
+                    }
+                }
+
+
+
+
+                //
+                // CONFIGS
+                //
                 var config = new ConfigFile(Path.Combine(Paths.ConfigPath, "Bertogim.LoadingScreen.cfg"), true);
 
-                var isEnabled = config.Bind("1. LoadingScreen", "Enabled", true, "Display a loading window with information about game load progress on game start-up.").Value;
+                var isEnabled = config.Bind("1. LoadingScreen", "Enabled", true, "Display a loading window with information about game load progress on game start-up.");
                 //#if DEBUG
                 //                const bool onlyNoConsoleDefault = false;
                 //#else
                 //                const bool onlyNoConsoleDefault = true;
                 //#endif
-                //var consoleNotAllowed = config.Bind("1. LoadingScreen", "OnlyNoConsole", onlyNoConsoleDefault, "Only display the splash screen if the logging console is turned off.").Value;
+                //var consoleNotAllowed = config.Bind("1. LoadingScreen", "OnlyNoConsole", onlyNoConsoleDefault, "Only display the splash screen if the logging console is turned off.");
 
-                var windowType = config.Bind("2. Window", "WindowType", "FakeGame", new ConfigDescription("FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears\nFixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less).", new AcceptableValueList<string>(new string[] { "FakeGame", "FixedWindow" }), new object[0])).Value;
-                var windowWidth = config.Bind("2. Window", "WindowWidth", 640, "The window width in pixels (Gets affected by windows screen scale config) \nHeight is automatically calculated by the image aspect ratio.").Value;
-                var extraWaitTime = config.Bind("2. Window", "ExtraWaitTime", 1, new ConfigDescription("Seconds extra to maintain the loading screen starting when the game window shows up.\nGood for big modpacks where the game window stays blank loading for a few seconds", new AcceptableValueRange<int>(0, 60), new object[0])).Value;
-                var titleBarColorHex = config.Bind("2. Window", "TitleBarColor", "#FFFFFF", "Hex color for the window's title bar (e.g. #1E90FF for DodgerBlue). Leave as #FFFFFF for default behavior. Requires Windows 10 build 1809+").Value;
-                var BackgroundColor = config.Bind("2. Window", "BackgroundColor", "#000000", "Hex color for the background (Custom images cover this)").Value;
+                var windowType = config.Bind("2. Window", "WindowType", "FakeGame", new ConfigDescription("FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears\nFixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less).", new AcceptableValueList<string>(new string[] { "FakeGame", "FixedWindow" }), new object[0]));
+                var windowWidth = config.Bind("2. Window", "WindowWidth", 640, "The window width in pixels (Gets affected by windows screen scale config) \nHeight is automatically calculated by the image aspect ratio.");
+                var extraWaitTime = config.Bind("2. Window", "ExtraWaitTime", 1, new ConfigDescription("Seconds extra to maintain the loading screen starting when the game window shows up.\nGood for big modpacks where the game window stays blank loading for a few seconds", new AcceptableValueRange<int>(0, 60), new object[0]));
+                var titleBarColorHex = config.Bind("2. Window", "TitleBarColor", "FFFFFF", "Hex color for the window's title bar (e.g. 1E90FF for DodgerBlue). Leave as FFFFFF for default behavior. Requires Windows 10 build 1809+");
+                var BackgroundColor = config.Bind("2. Window", "BackgroundColor", "000000", "Hex color for the background (Custom images cover this)");
 
-                var textColor = config.Bind("3. Text", "TextColor", "#FFFFFF", "Text color in hex format (e.g. #FFFFFF for white).").Value;
-                var textFont = config.Bind("3. Text", "TextFont", "Segoe UI", "Font name used for the loading text (e.g. Arial, Segoe UI, Consolas). Must match an installed system font.\nFor a list of default Windows fonts, visit: https://learn.microsoft.com/en-us/typography/fonts/windows_10_font_list").Value;
-                var textBackgroundColor = config.Bind("3. Text", "TextBackgroundColor", "#595959", "Hex color for background behind the text (e.g. #595959 for gray)").Value;
+                var textColor = config.Bind("3. Text", "TextColor", "FFFFFF", "Text color in hex format (e.g. FFFFFF for white).");
+                var textFont = config.Bind("3. Text", "TextFont", "Segoe UI", "Font name used for the loading text (e.g. Arial, Segoe UI, Consolas). Must match an installed system font.\nFor a list of default Windows fonts, visit: https://learn.microsoft.com/en-us/typography/fonts/windows_10_font_list");
+                var textBackgroundColor = config.Bind("3. Text", "TextBackgroundColor", "595959", "Hex color for background behind the text (e.g. 595959 for gray)");
 
-                var useCustomProgressBar = config.Bind("4. ProgressBar", "UseCustomProgressBar", true, "Whether to use a customizable progress bar (allows changing colors) instead of the Windows native one").Value;
-                var progressBarColor = config.Bind("4. ProgressBar", "ProgressBarColor", "#34b233", "Progress bar color, use a hex color (e.g. #34b233 for Wageningen Green)").Value;
-                var progressBarBackgroundColor = config.Bind("4. ProgressBar", "ProgressBarBackgroundColor", "#FFFFFF", "Progress bar background color, use a hex color (e.g. #FFFFFF for white)").Value;
-                var progressBarBorderSize = config.Bind("4. ProgressBar", "ProgressBarBorderSize", 0, new ConfigDescription("Border thickness in pixels (0-4)", new AcceptableValueRange<int>(0, 4), new object[0])).Value;
-                var progressBarBorderColorHex = config.Bind("4. ProgressBar", "ProgressBarBorderColor", "#FFFFFF", "Border color in hex format (e.g. #FF0000)").Value;
-                var progressBarBorderSmoothness = config.Bind("4. ProgressBar", "ProgressBarSmoothness", 25, new ConfigDescription("Loading bar smoothness when changing (0-100)", new AcceptableValueRange<int>(0, 100), new object[0])).Value;
+                var useCustomProgressBar = config.Bind("4. ProgressBar", "UseCustomProgressBar", true, "Whether to use a customizable progress bar (allows using the options below) instead of the Windows native one");
+                var progressBarColor = config.Bind("4. ProgressBar", "ProgressBarColor", "34b233", "Progress bar color, use a hex color (e.g. 34b233 for Wageningen Green)");
+                var progressBarBackgroundColor = config.Bind("4. ProgressBar", "ProgressBarBackgroundColor", "FFFFFF", "Progress bar background color, use a hex color (e.g. FFFFFF for white)");
+                var progressBarBorderSize = config.Bind("4. ProgressBar", "ProgressBarBorderSize", 0, new ConfigDescription("Border thickness in pixels (0-4)", new AcceptableValueRange<int>(0, 4), new object[0]));
+                var progressBarBorderColorHex = config.Bind("4. ProgressBar", "ProgressBarBorderColor", "FFFFFF", "Border color in hex format (e.g. FF0000)");
+                var progressBarBorderSmoothness = config.Bind("4. ProgressBar", "ProgressBarSmoothness", 25, new ConfigDescription("Loading bar smoothness when changing (0-100)", new AcceptableValueRange<int>(0, 100), new object[0]));
                 var progressBarCurveName = config.Bind(
                                     "4. ProgressBar",
                                     "ProgressBarCurve",
@@ -59,7 +87,7 @@ namespace BepInEx.SplashScreen
                                         "- EaseIn: Starts slow, speeds up\n" +
                                         "- EaseOut: Starts fast, slows down\n" +
                                         "- EaseInOut: Slow start and end\n" +
-                                        "- SmootherStep: Smoothest transition (default)\n" +
+                                        "- SmootherStep: Smoothest transition\n" +
                                         "- Exponential: Very slow start, accelerates\n" +
                                         "- Elastic: Overshoots and bounces into place\n" +
                                         "- Bounce: Bounces like a ball at the end\n" +
@@ -73,8 +101,25 @@ namespace BepInEx.SplashScreen
                                         "Bounce", "BackIn", "BackOut", "Spring"
                                         })
                                     )
-                                ).Value;
-                if (!isEnabled)
+                                );
+
+                //var showFakeFrameOnNotResponding = config.Bind("5. Other", "UseCustomProgressBar", false, "When lethal company shows up as 'Not Responding', a fake window mimicking the game will show up to avoid windows making the 'Close app or wait' window shop up");
+                var debugGeneratePluginLoadTimeInfo = config.Bind("5. Other", "GenerateStartupPluginLoadTimeInfo", false, "Generate information about how many time each plugin took to load (File will generate in BepInEx/Patchers/Bertogim-LoadingScreen/Debug)");
+
+
+                //
+                // MIGRATE HEX CODES WITH HASTAG TO WITHOUT HASTAG
+                //
+                CheckValue(titleBarColorHex);
+                CheckValue(BackgroundColor);
+                CheckValue(textColor);
+                CheckValue(textBackgroundColor);
+                CheckValue(progressBarColor);
+                CheckValue(progressBarBackgroundColor);
+                CheckValue(progressBarBorderColorHex);
+
+
+                if (!isEnabled.Value)
                 {
                     Logger.LogDebug("Not showing splash because the Enabled setting is off");
                     return;
