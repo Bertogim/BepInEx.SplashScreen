@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 using System.IO;
 
@@ -757,23 +758,15 @@ namespace BepInEx.SplashScreen
         }
 
 
+
         public void SetIcon(Image fallbackIcon)
         {
             try
             {
+                // Read configs
+                bool randomizeImage = bool.TryParse(GetBepInExConfigValue("2. Window", "RandomizeImage", "false"), out var r) && r;
+                string imagePathPattern = GetBepInExConfigValue("2. Window", "ImagePath", "./Plugins/*/LoadingScreen/*.png");
 
-                if (SplashScreenWindowType == "FakeGame")
-                {
-                    //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle; //Already default
-                    this.TopMost = false; //Till the game window shows up
-                }
-                if (SplashScreenWindowType == "FixedWindow")
-                {
-                    this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-                    this.ShowInTaskbar = false;
-                }
-
-                // Check if root path is null or empty
                 if (string.IsNullOrEmpty(BepInExRootPath))
                 {
                     _logAction?.Invoke("Couldn't find BepInEx root directory, using fallback icon", true);
@@ -781,46 +774,99 @@ namespace BepInEx.SplashScreen
                     return;
                 }
 
-                // 1. First check in patchers/Bertogim-LoadingScreen for any image file
-                string patchersPath = Path.Combine(BepInExRootPath, "patchers");
-                string patcherFolderPath = Path.Combine(patchersPath, "Bertogim-LoadingScreen");
+                // Resolve all matching images from the wildcard path
+                var images = ResolveImagePaths(BepInExRootPath, imagePathPattern);
 
-                if (Directory.Exists(patcherFolderPath))
+                if (images.Count == 0)
                 {
-                    string[] patcherImages = Directory.GetFiles(patcherFolderPath, "*.png");
-                    if (patcherImages.Length > 0)
-                    {
-                        _logAction?.Invoke("Using loading image: " + patcherImages[0], false);
-                        SetIconImage(patcherImages[0]);
-                        return;
-                    }
+                    _logAction?.Invoke("No suitable loading image found, using fallback icon", false);
+                    UseFallbackIcon(fallbackIcon);
+                    return;
                 }
 
-                // 2. Then check in plugins/*/LoadingScreen/LoadingImage.png
-                string pluginsPath = Path.Combine(BepInExRootPath, "plugins");
-                if (Directory.Exists(pluginsPath))
-                {
-                    string[] loadingScreenFolders = Directory.GetDirectories(pluginsPath, "LoadingScreen", SearchOption.AllDirectories);
-                    foreach (var folder in loadingScreenFolders)
-                    {
-                        string imagePath = Path.Combine(folder, "LoadingImage.png");
-                        if (File.Exists(imagePath))
-                        {
-                            _logAction?.Invoke("Using loading image: " + imagePath, false);
-                            SetIconImage(imagePath);
-                            return;
-                        }
-                    }
-                }
-
-                // If all checks fail, use fallback
-                _logAction?.Invoke("No suitable loading image found, using fallback icon", false);
-                UseFallbackIcon(fallbackIcon);
+                // Pick first or random
+                string selectedImage = randomizeImage ? images[new Random().Next(images.Count)] : images[0];
+                _logAction?.Invoke("Using loading image: " + selectedImage, false);
+                SetIconImage(selectedImage);
             }
             catch (Exception ex)
             {
                 _logAction?.Invoke($"Error setting icon: {ex.Message}", true);
                 UseFallbackIcon(fallbackIcon);
+            }
+        }
+        private List<string> ResolveImagePaths(string rootPath, string relativePattern)
+        {
+            List<string> results = new List<string>();
+
+            // Normalize path separators
+            relativePattern = relativePattern.Replace('/', Path.DirectorySeparatorChar);
+
+            // Split pattern by directory separators
+            string[] parts = relativePattern.Split(Path.DirectorySeparatorChar);
+
+            ResolveRecursive(rootPath, parts, 0, results, rootPath);
+
+            return results;
+        }
+
+        private void ResolveRecursive(string currentPath, string[] parts, int index, List<string> results, string rootPath)
+        {
+            if (index >= parts.Length) return;
+
+            string part = parts[index];
+
+            if (part.Contains("*") || part.Contains("?"))
+            {
+                if (index == parts.Length - 1)
+                {
+                    // Last part = file pattern
+                    try
+                    {
+                        foreach (var file in Directory.GetFiles(currentPath, part))
+                        {
+                            string fullFilePath = Path.GetFullPath(file);
+                            if (fullFilePath.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                results.Add(fullFilePath);
+                            } else {
+                                _logAction?.Invoke($"Skipped file outside BepInEx root: {fullFilePath}", true);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+                else
+                {
+                    // Intermediate directory wildcard
+                    try
+                    {
+                        foreach (var dir in Directory.GetDirectories(currentPath, part))
+                        {
+                            string fullDirPath = Path.GetFullPath(dir);
+                            if (fullDirPath.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                ResolveRecursive(dir, parts, index + 1, results, rootPath);
+                            } else {
+                                _logAction?.Invoke($"Skipped directory outside BepInEx root: {fullDirPath}", true);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            else
+            {
+                // Normal folder name
+                string nextPath = Path.Combine(currentPath, part);
+                string fullNextPath = Path.GetFullPath(nextPath);
+
+                if (fullNextPath.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase) && Directory.Exists(fullNextPath))
+                {
+                    ResolveRecursive(fullNextPath, parts, index + 1, results, rootPath);
+                } else {
+                    _logAction?.Invoke($"Skipped path outside BepInEx root or does not exist: {fullNextPath}", true);
+                }
             }
         }
 

@@ -66,7 +66,7 @@ namespace BepInEx.SplashScreen
                 var titleBarColorHex = config.Bind("2. Window", "TitleBarColor", "FFFFFF", "Hex color for the window's title bar (e.g. 1E90FF for DodgerBlue). Leave as FFFFFF for default behavior. Requires Windows 10 build 1809+");
                 var BackgroundColor = config.Bind("2. Window", "BackgroundColor", "000000", "Hex color for the background (Custom images cover this)");
                 var RandomizeImage = config.Bind("2. Window", "RandomizeImage", false, "Whether to randomize the background image on each game start");
-                var CustomImagePath = config.Bind("2. Window", "CustomImagePath", "./Plugins/LoadingScreen", "Path to where to get the image or images for the background");
+                var ImagePath = config.Bind("2. Window", "ImagePath", "./Plugins/*/LoadingScreen/*.png", "Path to where to get the image or images for the background");
 
                 var textColor = config.Bind("3. Text", "TextColor", "FFFFFF", "Text color in hex format (e.g. FFFFFF for white).");
                 var textFont = config.Bind("3. Text", "TextFont", "Segoe UI", "Font name used for the loading text (e.g. Arial, Segoe UI, Consolas). Must match an installed system font.\nFor a list of default Windows fonts, visit: https://learn.microsoft.com/en-us/typography/fonts/windows_10_font_list");
