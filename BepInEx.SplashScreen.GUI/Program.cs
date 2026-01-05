@@ -535,7 +535,17 @@ namespace BepInEx.SplashScreen
                             _mainForm.FormBorderStyle = FormBorderStyle.None;
                             _mainForm.TopMost = false; //To make window not crash when setting ShowInTaskbar to false
                             _mainForm.ShowInTaskbar = false;
-                            _mainForm.TopMost = true;
+                            //_mainForm.TopMost = true;
+                            
+                            if (SplashScreenWindowType == "FakeGame")
+                            {
+                                NativeMethods.SetWindowLongPtr(
+                                    _mainForm.Handle,
+                                    NativeMethods.GWL_HWNDPARENT,
+                                    gameWindowHandle
+                                );
+                            }
+
                         });
 
 
@@ -588,6 +598,32 @@ namespace BepInEx.SplashScreen
 
                 return (style & WS_CAPTION) == 0 && (style & WS_SYSMENU) == 0;
             }
+
+            public const int GWL_HWNDPARENT = -8;
+
+            [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
+            private static extern IntPtr SetWindowLongPtr64(
+                IntPtr hWnd,
+                int nIndex,
+                IntPtr dwNewLong);
+
+            [DllImport("user32.dll", EntryPoint = "SetWindowLong")]
+            private static extern IntPtr SetWindowLongPtr32(
+                IntPtr hWnd,
+                int nIndex,
+                IntPtr dwNewLong);
+
+            public static IntPtr SetWindowLongPtr(
+                IntPtr hWnd,
+                int nIndex,
+                IntPtr dwNewLong)
+            {
+                if (IntPtr.Size == 8)
+                    return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
+                else
+                    return SetWindowLongPtr32(hWnd, nIndex, dwNewLong);
+            }
+
         }
         #endregion
     }

@@ -60,11 +60,13 @@ namespace BepInEx.SplashScreen
                 //#endif
                 //var consoleNotAllowed = config.Bind("1. LoadingScreen", "OnlyNoConsole", onlyNoConsoleDefault, "Only display the splash screen if the logging console is turned off.");
 
-                var windowType = config.Bind("2. Window", "WindowType", "FakeGame", new ConfigDescription("FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears\nFixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less).", new AcceptableValueList<string>(new string[] { "FakeGame", "FixedWindow" }), new object[0]));
+                var windowType = config.Bind("2. Window", "WindowType", "FakeGame", new ConfigDescription("FakeGame = Makes a window with the same icon as the game, tries to mimic the game till it appears\nFixedWindow = A fixed loading screen on top of all windows, cant move or close and is not on the taskbar (Same behavior as v1.0.5 and less) (I wouldn't use this option since it can be annoying to have the loading screen stuck on top of everything).", new AcceptableValueList<string>(new string[] { "FakeGame", "FixedWindow" }), new object[0]));
                 var windowWidth = config.Bind("2. Window", "WindowWidth", 640, "The window width in pixels (Gets affected by windows screen scale config) \nHeight is automatically calculated by the image aspect ratio.");
                 var extraWaitTime = config.Bind("2. Window", "ExtraWaitTime", 1, new ConfigDescription("Seconds extra to maintain the loading screen starting when the game window shows up.\nGood for big modpacks where the game window stays blank loading for a few seconds", new AcceptableValueRange<int>(0, 60), new object[0]));
                 var titleBarColorHex = config.Bind("2. Window", "TitleBarColor", "FFFFFF", "Hex color for the window's title bar (e.g. 1E90FF for DodgerBlue). Leave as FFFFFF for default behavior. Requires Windows 10 build 1809+");
                 var BackgroundColor = config.Bind("2. Window", "BackgroundColor", "000000", "Hex color for the background (Custom images cover this)");
+                var RandomizeImage = config.Bind("2. Window", "RandomizeImage", false, "Whether to randomize the background image on each game start");
+                var CustomImagePath = config.Bind("2. Window", "CustomImagePath", "./Plugins/LoadingScreen", "Path to where to get the image or images for the background");
 
                 var textColor = config.Bind("3. Text", "TextColor", "FFFFFF", "Text color in hex format (e.g. FFFFFF for white).");
                 var textFont = config.Bind("3. Text", "TextFont", "Segoe UI", "Font name used for the loading text (e.g. Arial, Segoe UI, Consolas). Must match an installed system font.\nFor a list of default Windows fonts, visit: https://learn.microsoft.com/en-us/typography/fonts/windows_10_font_list");
