@@ -1,4 +1,9 @@
-## v1.1.2 (Current version)
+## v1.1.3 (Current version)
+- Image path is now fully customizable
+- If more than one image is found, it will select a random one (Configurable)
+- Made the load times html dark mode and added "total load time" for the txt and html
+
+## v1.1.2
 - Added gale mod manager config support for colors.
 - Fixed skipped plugins making the loading progress skip to a certain percentage.
 - Improved the plugin timeout timer

@@ -267,10 +267,14 @@ namespace BepInEx.SplashScreen
 
         private static string GenerateHtmlReport(Dictionary<string, TimeSpan> loadTimes)
         {
+            var totalTime = loadTimes.Values.Aggregate(TimeSpan.Zero, (acc, ts) => acc.Add(ts));
+            
             string rows = string.Join("\n", loadTimes
                 .OrderByDescending((KeyValuePair<string, TimeSpan> kv) => kv.Value)
                 .Select((KeyValuePair<string, TimeSpan> kv) => string.Format("<tr><td>{0}</td><td>{1:F3} s</td></tr>", kv.Key, kv.Value.TotalSeconds))
                 .ToArray());
+
+            string totalRow = string.Format("<tr style=\"font-weight: bold; background-color: #444;\"><td>TOTAL</td><td>{0:F3} s</td></tr>", totalTime.TotalSeconds);
 
             return $@"
             <!DOCTYPE html>
@@ -281,32 +285,32 @@ namespace BepInEx.SplashScreen
                 <style>
                     body {{
                         font-family: Arial, sans-serif;
-                        background-color: #f0f2f5;
+                        background-color: #1e1e1e;
+                        color: #ffffff;
                         padding: 20px;
                     }}
                     table {{
                         width: 100%;
                         border-collapse: collapse;
-                        background-color: white;
+                        background-color: #2d2d2d;
                     }}
                     th, td {{
                         padding: 12px;
                         text-align: left;
-                        border-bottom: 1px solid #ddd;
+                        border-bottom: 1px solid #444;
                     }}
                     th {{
-                        background-color: #4CAF50;
-                        color: white;
+                        background-color: #3d3d3d;
+                        color: #ffffff;
                     }}
                     tr {{
-                        border-bottom: 2px solid;
-                        border-color: #b2b2b2
+                        border-bottom: 1px solid #444;
                     }}
                     body > table > tbody > tr:nth-child(1) {{
                         border: none;
                     }}
                     tr:hover {{
-                        background-color: #d3d3d3;
+                        background-color: #3d3d3d;
                     }}
                 </style>
             </head>
@@ -319,6 +323,7 @@ namespace BepInEx.SplashScreen
                         <th>Load Time</th>
                     </tr>
                     {rows}
+                    {totalRow}
                 </table>
             </body>
             </html>";
@@ -357,7 +362,15 @@ namespace BepInEx.SplashScreen
             string txtPath = Path.Combine(debugPath, "PluginLoadTimes.txt");
             string htmlPath = Path.Combine(debugPath, "PluginLoadTimes.html");
 
-            var lines = _pluginLoadTimes.Select(kv => $"{kv.Key}: {kv.Value.TotalMilliseconds:F2} ms").ToList();
+            var totalTime = _pluginLoadTimes.Values.Aggregate(TimeSpan.Zero, (acc, ts) => acc.Add(ts));
+            var lines = new List<string>
+            {
+                "Load times can vary from startup to startup",
+                $"Total Load Time: {totalTime.TotalSeconds:F3} s",
+                ""
+            };
+            lines.AddRange(_pluginLoadTimes.Select(kv => $"{kv.Key}: {kv.Value.TotalMilliseconds:F2} ms").ToList());
+            
             File.WriteAllLines(txtPath, lines.ToArray());
 
             string html = GenerateHtmlReport(_pluginLoadTimes);
