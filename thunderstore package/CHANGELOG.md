@@ -1,4 +1,8 @@
-## v1.1.3 (Current version)
+## v1.1.4 (Current version)
+- Made normal logs finally appear
+- Separated loading image finder logs to a config
+
+## v1.1.3
 - Image path is now fully customizable
 - If more than one image is found, it will select a random one (Configurable)
 - Made the load times html dark mode and added "total load time" for the txt and html

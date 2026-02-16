@@ -420,16 +420,19 @@ namespace BepInEx.SplashScreen
             {
                 case LoadEvent.PreloaderStart:
                     SetStatusMain("BepInEx patchers are being applied...");
+                    _logAction?.Invoke("Detected preloader started", false);
                     break;
 
                 case LoadEvent.PreloaderFinish:
                     checkedListBox1.SetItemChecked(0, true);
                     SetStatusMain("Finished applying patchers.");
                     SetStatusDetail("Plugins should start loading soon.");//\nIn case loading is stuck, check your entry point.");
+                    _logAction?.Invoke("Detected preloader finished", false);
                     break;
 
                 case LoadEvent.ChainloaderStart:
                     SetStatusMain("BepInEx plugins are being loaded...");
+                    _logAction?.Invoke("Detected chainloader started", false);
                     break;
 
                 case LoadEvent.ChainloaderFinish:
@@ -438,10 +441,12 @@ namespace BepInEx.SplashScreen
                     SetStatusDetail("Waiting for the game to start...");//\nSome plugins might need more time to finish loading.");
                                                                         //Game window starts?
                                                                         //this.ShowInTaskbar = false; //Moved to program.cs 315
-
+                    _logAction?.Invoke("Detected chainloader finished", false);
                     break;
 
                 case LoadEvent.LoadFinished:
+
+                    _logAction?.Invoke("Detected load finished", false);
 
 
                     checkedListBox1.SetItemChecked(1, true);
@@ -757,6 +762,7 @@ namespace BepInEx.SplashScreen
             }
         }
 
+        public static bool imagePathLogs = bool.TryParse(GetBepInExConfigValue("2. Window", "ImagePathLogs", "false"), out var l) && l;
 
 
         public void SetIcon(Image fallbackIcon)
@@ -816,6 +822,10 @@ namespace BepInEx.SplashScreen
 
             string part = parts[index];
 
+            if (imagePathLogs == true) {
+                _logAction?.Invoke($"Resolving part '{part}' in '{currentPath}'", false);
+            }
+
             if (part.Contains("*") || part.Contains("?"))
             {
                 if (index == parts.Length - 1)
@@ -830,7 +840,9 @@ namespace BepInEx.SplashScreen
                             {
                                 results.Add(fullFilePath);
                             } else {
-                                _logAction?.Invoke($"Skipped file outside BepInEx root: {fullFilePath}", true);
+                                if (imagePathLogs == true) {
+                                    _logAction?.Invoke($"Skipped file outside BepInEx root: {fullFilePath}", false);
+                                }
                             }
                         }
                     }
@@ -848,7 +860,9 @@ namespace BepInEx.SplashScreen
                             {
                                 ResolveRecursive(dir, parts, index + 1, results, rootPath);
                             } else {
-                                _logAction?.Invoke($"Skipped directory outside BepInEx root: {fullDirPath}", true);
+                                if (imagePathLogs == true) {
+                                    _logAction?.Invoke($"Skipped directory outside BepInEx root: {fullDirPath}", false);
+                                }
                             }
                         }
                     }
@@ -865,7 +879,9 @@ namespace BepInEx.SplashScreen
                 {
                     ResolveRecursive(fullNextPath, parts, index + 1, results, rootPath);
                 } else {
-                    _logAction?.Invoke($"Skipped path outside BepInEx root or does not exist: {fullNextPath}", true);
+                    if (imagePathLogs == true) {
+                        _logAction?.Invoke($"Skipped path outside BepInEx root or does not exist: {fullNextPath}", false);
+                    }
                 }
             }
         }

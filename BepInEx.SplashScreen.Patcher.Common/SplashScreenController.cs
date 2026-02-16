@@ -67,6 +67,7 @@ namespace BepInEx.SplashScreen
                 var BackgroundColor = config.Bind("2. Window", "BackgroundColor", "000000", "Hex color for the background (Custom images cover this)");
                 var RandomizeImage = config.Bind("2. Window", "RandomizeImage", false, "Whether to randomize the background image on each game start");
                 var ImagePath = config.Bind("2. Window", "ImagePath", "./Plugins/*/LoadingScreen/*.png", "Path to where to get the image or images for the background\n Relative to the BepInEx folder");
+                var ImagePathLogs = config.Bind("2. Window", "ImagePathLogs", false, "Enable extra logging about image path finding");
 
                 var textColor = config.Bind("3. Text", "TextColor", "FFFFFF", "Text color in hex format (e.g. FFFFFF for white).");
                 var textFont = config.Bind("3. Text", "TextFont", "Segoe UI", "Font name used for the loading text (e.g. Arial, Segoe UI, Consolas). Must match an installed system font.\nFor a list of default Windows fonts, visit: https://learn.microsoft.com/en-us/typography/fonts/windows_10_font_list");
@@ -141,7 +142,7 @@ namespace BepInEx.SplashScreen
                 if (!File.Exists(guiExecutablePath))
                     throw new FileNotFoundException("Executable not found or inaccessible at " + guiExecutablePath);
 
-                Logger.Log(LogLevel.Debug, "Starting GUI process: " + guiExecutablePath);
+                Logger.Log(LogLevel.Info, "Starting GUI process: " + guiExecutablePath);
 
                 var psi = new ProcessStartInfo(guiExecutablePath, Process.GetCurrentProcess().Id.ToString())
                 {
@@ -180,7 +181,7 @@ namespace BepInEx.SplashScreen
 
                 guiProcess.OutputDataReceived += (sender, args) =>
                 {
-                    if (args.Data != null) Logger.Log(LogLevel.Debug, "[GUI] " + args.Data.Replace('\t', '\n').TrimEnd('\n'));
+                    if (args.Data != null) Logger.Log(LogLevel.Info, "[GUI] " + args.Data.Replace('\t', '\n').TrimEnd('\n'));
                 };
                 guiProcess.BeginOutputReadLine();
 
