@@ -3,10 +3,10 @@
 This is a cool mod if you want to disable the console and have a visible loading bar! It's also very useful for tracking progress when loading large modpacks.
 
 ## Custom loading image
-- If you're making a mod, create a folder named `LoadingScreen` anywhere inside your mod, and place a `LoadingImage.png` file inside it.
-The loading screen search is something like this: `BepInEx/plugins/*/LoadingScreen/LoadingImage.png`
+- If you're making a mod, create a folder named `LoadingScreen` anywhere inside your mod, and place a `.png` file inside it.
+The loading screen search is something like this: `BepInEx/plugins/*/LoadingScreen/*.png`
 
-- If you're making a modpack and want to add or override a mod's loading image, simply place your `LoadingImage.png` (you can name it whatever you want in this case) inside `BepInEx/patchers/Bertogim-LoadingScreen`.
+- You can customize the image search and randomize the images found
 
 ## About the fork
 BepInEx.SplashScreen.GUI.exe is renamed to LoadingScreen.GUI.exe to try to fix discord activity detecting the loading screen as other game
